@@ -1,0 +1,10 @@
+[gd_scene format=3 uid="uid://jtq6kywly6hb"]
+
+[ext_resource type="Script" uid="uid://dgx6vmpi2nfef" path="res://BlockMaster.cs" id="1_wtcfe"]
+[ext_resource type="PackedScene" uid="uid://6kgl0qtbjc5p" path="res://draggable_block.tscn" id="2_0e48y"]
+
+[node name="Node2D" type="Node2D" unique_id=464114368]
+script = ExtResource("1_wtcfe")
+
+[node name="DraggableBlock" parent="." unique_id=562330160 instance=ExtResource("2_0e48y")]
+position = Vector2(923, 125)

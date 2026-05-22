@@ -1,0 +1,27 @@
+# Godot 4+ specific ignores
+.godot/
+/android/
+*.uid
+
+# .NET / C# Derleme Çıktıları (Rider/VS artıkları)
+.mono/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+bld/
+[Bb]in/
+[Oo]bj/
+.idea/
+
+# Android ve iOS Çıktıları
+*.apk
+*.ap_
+*.aab
+android/
+ios/
+
+# Mac İşletim Sistemi Çöpleri
+.DS_StoreBlockMaster.xcframework/
+BlockMaster/dylibs/
+*.a

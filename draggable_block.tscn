@@ -1,0 +1,7 @@
+[gd_scene format=3 uid="uid://6kgl0qtbjc5p"]
+
+[ext_resource type="Script" uid="uid://bmggb6jyc1ylf" path="res://DraggableBlock.cs" id="1_i2re0"]
+
+[node name="DraggableBlock" type="Area2D" unique_id=562330160]
+position = Vector2(909, 109)
+script = ExtResource("1_i2re0")
