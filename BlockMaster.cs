@@ -23,12 +23,12 @@ public partial class BlockMaster : Node2D
 
 	private int _score = 0;
 	private int _comboStreak = 0;
-
 	private Label _scoreLabel;
-
 	private int _highScore = 0;
 	private Label _highScoreLabel;
 	private const string SaveFilePath = "user://highscore.cfg";
+
+	private AudioStreamPlayer _dropSound;
 
 	private List<BlockShape> _shapeDatabase = new List<BlockShape>();
 	private List<DraggableBlock> _activeBlocks = new List<DraggableBlock>();
@@ -46,6 +46,8 @@ public partial class BlockMaster : Node2D
 		SetupScoreUI();
 		LoadShapeDatabase();
 		SpawnInitialBlocks();
+
+		_dropSound = GetNode<AudioStreamPlayer>("DropSoundPlayer");
 
 		//TestBlockPlacements();
 
@@ -276,21 +278,21 @@ public partial class BlockMaster : Node2D
 
 				StyleBoxFlat style = new StyleBoxFlat();
 				style.BgColor = new Color(0.2f, 0.2f, 0.2f);
-             
+			 
 				// Tahtadaki boş yuvaların da havalı siyah kenarlıkları ve oval köşeleri olsun
 				style.BorderWidthTop = 4;
 				style.BorderWidthBottom = 4;
 				style.BorderWidthLeft = 4;
 				style.BorderWidthRight = 4;
 				style.BorderColor = new Color(0.1f, 0.1f, 0.1f, 0.8f); 
-             
+			 
 				style.CornerRadiusTopLeft = 12;
 				style.CornerRadiusTopRight = 12;
 				style.CornerRadiusBottomLeft = 12;
 				style.CornerRadiusBottomRight = 12;
 
 				rect.AddThemeStyleboxOverride("panel", style);
-             
+			 
 				AddChild(rect);
 				_visualGrid[x, y] = rect;
 			}
@@ -334,7 +336,7 @@ public partial class BlockMaster : Node2D
 			{
 				// Panel'in içindeki tasarımı al
 				StyleBoxFlat style = (StyleBoxFlat)_visualGrid[x, y].GetThemeStylebox("panel");
-             
+			 
 				// Sadece arka plan rengini değiştir, kenarlıklar ve oval köşeler sabit kalsın
 				style.BgColor = GetColorForBlock(_grid[x, y]);
 
@@ -381,6 +383,8 @@ public partial class BlockMaster : Node2D
 		// Blok hedefe sigiyormu ?
 		if (CanPlaceBlock(block.ShapeData, targetIndex.X, targetIndex.Y))
 		{
+			_dropSound.Play();
+			
 			PlaceBlock(block.ShapeData, targetIndex.X, targetIndex.Y);
 			_activeBlocks.Remove(block);
 			

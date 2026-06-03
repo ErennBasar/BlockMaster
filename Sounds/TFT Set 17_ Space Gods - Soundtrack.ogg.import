@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://cchpcyepffcp0"
+path="res://.godot/imported/TFT Set 17_ Space Gods - Soundtrack.ogg-cf646649e81b647f79413f77f8d556c6.oggvorbisstr"
+
+[deps]
+
+source_file="res://Sounds/TFT Set 17_ Space Gods - Soundtrack.ogg"
+dest_files=["res://.godot/imported/TFT Set 17_ Space Gods - Soundtrack.ogg-cf646649e81b647f79413f77f8d556c6.oggvorbisstr"]
+
+[params]
+
+loop=true
+loop_offset=0.0
+bpm=0.0
+beat_count=0
+bar_beats=4

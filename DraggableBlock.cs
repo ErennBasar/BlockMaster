@@ -59,7 +59,7 @@ public partial class DraggableBlock : Area2D
 		{
 			Panel blockPanel = new Panel();
 			blockPanel.Size = new Vector2(CellSize, CellSize);
-          
+		  
 			StyleBoxFlat style = new StyleBoxFlat();
 			
 			// ID'ye göre renk ataması
@@ -83,7 +83,7 @@ public partial class DraggableBlock : Area2D
 			style.BorderWidthLeft = 4;
 			style.BorderWidthRight = 4;
 			style.BorderColor = new Color(0f, 0f, 0f, 0.4f); // Yarı saydam siyah kenarlık
-          
+		  
 			style.CornerRadiusTopLeft = 12;
 			style.CornerRadiusTopRight = 12;
 			style.CornerRadiusBottomLeft = 12;
