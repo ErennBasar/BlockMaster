@@ -32,6 +32,7 @@ public partial class BlockMaster : Node2D
 
 	private List<BlockShape> _shapeDatabase = new List<BlockShape>();
 	private List<DraggableBlock> _activeBlocks = new List<DraggableBlock>();
+	private List<Vector2I> _currentShadowCells = new List<Vector2I>();
 	
 	// Sahne Referansı 
 	private PackedScene _blockScene = GD.Load<PackedScene>("res://draggable_block.tscn");
@@ -335,23 +336,29 @@ public partial class BlockMaster : Node2D
 				StyleBoxFlat style = (StyleBoxFlat)_visualGrid[x, y].GetThemeStylebox("panel");
              
 				// Sadece arka plan rengini değiştir, kenarlıklar ve oval köşeler sabit kalsın
-				style.BgColor = _grid[x, y] switch
-				{
-					0 => new Color(0.2f, 0.2f, 0.2f),       // Boş tahta rengi (Koyu Gri)
-					1 => new Color(1f, 0.839f, 0.647f),     // Acik turuncu
-					2 => new Color(0.91f, 0.612f, 0.506f),  // Acik kirmizi
-					3 => new Color(0.82f, 0.384f, 0.361f),  // Kirmizi
-					4 => new Color(0.918f, 0.769f, 0.835f), // Acik pembe
-					5 => new Color(0.839f, 0.918f, 0.875f), // Acik yesil
-					6 => new Color(0.722f, 0.878f, 0.831f), // Su yesili
-					7 => new Color(0.584f, 0.722f, 0.82f),  // Soluk mavi
-					8 => new Color(0.502f, 0.608f, 0.808f), // Mavi
-					9 => new Color(0.243f, 0.71f, 0.616f),  // BMW yesili
-					10 => new Color(0.243f, 0.71f, 0.616f), // BMW yesili
-					_ => new Color(0.2f, 0.2f, 0.2f)        // Güvenlik: Bilinmeyen ID gelirse boş kalsın
-				};
+				style.BgColor = GetColorForBlock(_grid[x, y]);
+
 			}
 		}
+	}
+
+	private Color GetColorForBlock(int id)
+	{
+		return id switch
+		{
+			0 => new Color(0.2f, 0.2f, 0.2f), // Boş tahta
+			1 => new Color(1f, 0.839f, 0.647f), // Acik turuncu
+			2 => new Color(0.91f, 0.612f, 0.506f), // Acik kirmizi
+			3 => new Color(0.82f, 0.384f, 0.361f), // Kirmizi
+			4 => new Color(0.918f, 0.769f, 0.835f), // Acik pembe
+			5 => new Color(0.839f, 0.918f, 0.875f), // Acik yesil
+			6 => new Color(0.722f, 0.878f, 0.831f), // Su yesili
+			7 => new Color(0.584f, 0.722f, 0.82f), // Soluk mavi
+			8 => new Color(0.502f, 0.608f, 0.808f), // Mavi
+			9 => new Color(0.243f, 0.71f, 0.616f), // BMW yesili
+			10 => new Color(0.243f, 0.71f, 0.616f), // BMW yesili
+			_ => new Color(0.2f, 0.2f, 0.2f)
+		};
 	}
 
 	private Vector2I PixelToGridIndex(Vector2 pixelPos)
@@ -368,6 +375,7 @@ public partial class BlockMaster : Node2D
 	{
 		// Gelen piksel matris indeksine cevir
 		Vector2I targetIndex = PixelToGridIndex(dropPosition);
+		ClearShadows();
 		GD.Print($"Hedef indeks hesaplandi: X:{targetIndex.X}, Y:{targetIndex.Y}");
 		
 		// Blok hedefe sigiyormu ?
@@ -437,6 +445,8 @@ public partial class BlockMaster : Node2D
 		
 		// Random random = new Random();
 		// BlockShape templateShape = _shapeDatabase[random.Next(_shapeDatabase.Count)];
+
+		newBlock.OnBlockDragging += HandleBlockDragging;
 		
 		BlockShape templateShape = GetDynamicRandomShape();
 		
@@ -457,6 +467,42 @@ public partial class BlockMaster : Node2D
 		
 		AddChild(newBlock);
 		_activeBlocks.Add(newBlock);
+	}
+	
+	private void HandleBlockDragging(DraggableBlock block, Vector2 dragPosition)
+	{
+		Vector2I targetIndex = PixelToGridIndex(dragPosition);
+
+		
+		ClearShadows();
+
+		// Eğer blok o anki yere tam sığıyorsa yeni gölgeleri hesapla ve çiz
+		if (CanPlaceBlock(block.ShapeData, targetIndex.X, targetIndex.Y))
+		{
+			Color shadowColor = GetColorForBlock(block.ShapeData.BlockId);
+			shadowColor.A = 0.5f; // Rengi %50 saydam (şeffaf) yapıyoruz ki "Gölge" gibi dursun!
+
+			foreach (Vector2I offset in block.ShapeData.LocalCoordinates)
+			{
+				int gridX = targetIndex.X + offset.X;
+				int gridY = targetIndex.Y + offset.Y;
+
+				_currentShadowCells.Add(new Vector2I(gridX, gridY));
+
+				// Hücrenin Panel stilini al ve saydam renge boya
+				StyleBoxFlat style = (StyleBoxFlat)_visualGrid[gridX, gridY].GetThemeStylebox("panel");
+				style.BgColor = shadowColor;
+			}
+		}
+	}
+
+	private void ClearShadows()
+	{
+		if (_currentShadowCells.Count > 0)
+		{
+			_currentShadowCells.Clear();
+			SyncVisuals(); // SyncVisuals çağırdığımızda tahta zaten gerçek/orijinal renklerine geri döner
+		}
 	}
 
 	private void AddScore(int points, string reason)

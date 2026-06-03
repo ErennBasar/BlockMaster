@@ -15,6 +15,7 @@ public partial class DraggableBlock : Area2D
 	
 	// Blok birakildiginda BlockMaster'a haber verecek
 	public Action<DraggableBlock, Vector2> OnBlockDropped;
+	public Action<DraggableBlock, Vector2> OnBlockDragging;
 
 	public Action<DraggableBlock> OnBlockRotated;
 
@@ -181,6 +182,8 @@ public partial class DraggableBlock : Area2D
 		{
 			// Bloğun pozisyonunu, farenin ekrandaki pozisyonu + ilk tıkladığımız yerin ofseti yap
 			GlobalPosition = GetGlobalMousePosition() + _dragOffset;
+			
+			OnBlockDragging?.Invoke(this, GlobalPosition);
 		}
 	}
 
