@@ -4,6 +4,7 @@
 [ext_resource type="PackedScene" uid="uid://6kgl0qtbjc5p" path="res://draggable_block.tscn" id="2_0e48y"]
 [ext_resource type="AudioStream" uid="uid://8k7ommnjo81g" path="res://Sounds/universfield-bubble-pop-06-351337.wav" id="3_epypp"]
 [ext_resource type="AudioStream" uid="uid://cchpcyepffcp0" path="res://Sounds/TFT Set 17_ Space Gods - Soundtrack.ogg" id="4_0hol4"]
+[ext_resource type="AudioStream" uid="uid://citgcjpuy4rwo" path="res://Sounds/floraphonic-cute-level-up-3-189853.wav" id="5_q6r6c"]
 
 [node name="Node2D" type="Node2D" unique_id=464114368]
 script = ExtResource("1_wtcfe")
@@ -18,3 +19,6 @@ stream = ExtResource("3_epypp")
 stream = ExtResource("4_0hol4")
 volume_db = -16.672
 autoplay = true
+
+[node name="ClearSoundPlayer" type="AudioStreamPlayer" parent="." unique_id=1520390531]
+stream = ExtResource("5_q6r6c")

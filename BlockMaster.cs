@@ -29,6 +29,7 @@ public partial class BlockMaster : Node2D
 	private const string SaveFilePath = "user://highscore.cfg";
 
 	private AudioStreamPlayer _dropSound;
+	private AudioStreamPlayer _clearSound;
 
 	private List<BlockShape> _shapeDatabase = new List<BlockShape>();
 	private List<DraggableBlock> _activeBlocks = new List<DraggableBlock>();
@@ -48,6 +49,7 @@ public partial class BlockMaster : Node2D
 		SpawnInitialBlocks();
 
 		_dropSound = GetNode<AudioStreamPlayer>("DropSoundPlayer");
+		_clearSound = GetNode<AudioStreamPlayer>("ClearSoundPlayer");
 
 		//TestBlockPlacements();
 
@@ -232,6 +234,7 @@ public partial class BlockMaster : Node2D
 		//Temizleme ve kombo erkani
 		if (cellsToClear.Count > 0)
 		{
+			_clearSound.Play();
 			_comboStreak++;
 			
 			foreach (Vector2I cell in cellsToClear)
@@ -698,6 +701,22 @@ public partial class BlockMaster : Node2D
 		}
 
 		return (float)filledCount / 64f;
+	}
+
+	private bool IsBoardEmpty()
+	{
+		for (int x = 0; x < 8; x++)
+		{
+			for (int y = 0; y < 8; y++)
+			{
+				if (_grid[x, y] != 0)
+				{
+					return false;
+				}
+			}
+		}
+
+		return true;
 	}
 
 	private bool CheckForGameOver()
