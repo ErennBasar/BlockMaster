@@ -30,6 +30,7 @@ public partial class BlockMaster : Node2D
 
 	private AudioStreamPlayer _dropSound;
 	private AudioStreamPlayer _clearSound;
+	private AudioStreamPlayer _perfectSound;
 
 	private List<BlockShape> _shapeDatabase = new List<BlockShape>();
 	private List<DraggableBlock> _activeBlocks = new List<DraggableBlock>();
@@ -50,6 +51,7 @@ public partial class BlockMaster : Node2D
 
 		_dropSound = GetNode<AudioStreamPlayer>("DropSoundPlayer");
 		_clearSound = GetNode<AudioStreamPlayer>("ClearSoundPlayer");
+		_perfectSound = GetNode<AudioStreamPlayer>("PerfectClearSoundPlayer");
 
 		//TestBlockPlacements();
 
@@ -245,20 +247,36 @@ public partial class BlockMaster : Node2D
 			GD.Print($"BOOM! {linesCleared} adet çizgi/bölge patlatıldı! Toplam silinen hücre: {cellsToClear.Count}");
 
 			int baseScorePerLine = 100;
-			
 			int comboMultiplier = linesCleared + (_comboStreak - 1);
-
 			int clearScore = (linesCleared * baseScorePerLine) * comboMultiplier;
+			
+			Vector2 boardCenter = new Vector2(GridStartX + (4 * Step), GridStartY + (4 * Step));
 			
 			// Eger birden fazla bolge ayni anda patlatildiysa
 			if (linesCleared > 1 || _comboStreak > 1)
 			{
 				GD.Print($"BOOM! {linesCleared} ÇİZGİ PATLADI! | SERİ: x{_comboStreak} | ÇARPAN: X{comboMultiplier}");
 				AddScore(clearScore, $"X{comboMultiplier} KOMBO PATLATMASI");
+				
+				// KOMBO YAZISINI FIRLAT (Altın sarısı ve 1.5x devasa boyutta)
+				ShowFloatingText(boardCenter, $"{linesCleared} LINE COMBO!\n+{clearScore}", new Color(1f, 0.84f, 0f), 1.5f);
 			}
 			else
 			{
 				AddScore(clearScore, "Tekli Patlatma");
+				
+				// NORMAL PATLATMA YAZISI (Beyaz ve standart boyutta)
+				ShowFloatingText(boardCenter, $"+{clearScore}", new Color(1f, 1f, 1f), 1.0f);
+			}
+
+			if (IsBoardEmpty())
+			{
+				GD.Print("MÜKEMMEL TEMİZLİK! TAHTADA HİÇBİR ŞEY KALMADI!");
+				_perfectSound.Play();
+				AddScore(4000,"PERFECT CLEAR!");
+				
+				// PERFECT YAZISI (Fosforlu Yeşil ve 2x devasa boyutta biraz daha yukarıdan)
+				ShowFloatingText(boardCenter + new Vector2(0, -60), "PERFECT CLEAR!\n+1000", new Color(0.2f, 1f, 0.2f), 2.0f);
 			}
 		}
 		else
@@ -717,6 +735,42 @@ public partial class BlockMaster : Node2D
 		}
 
 		return true;
+	}
+	
+	private void ShowFloatingText(Vector2 startPosition, string text, Color textColor, float scale = 1.0f)
+	{
+		Label floatingLabel = new Label();
+		floatingLabel.Text = text;
+        
+		// Yazı için Jilet gibi bir tasarım (Style) ayarı
+		LabelSettings settings = new LabelSettings();
+		settings.FontSize = (int)(32 * scale); // Font boyutunu kombo büyüklüğüne göre büyüt!
+		settings.FontColor = textColor;
+		settings.OutlineSize = 6;
+		settings.OutlineColor = new Color(0, 0, 0, 0.8f); // Yazı okunsun diye kalın siyah kenarlık
+		floatingLabel.LabelSettings = settings;
+
+		floatingLabel.ZIndex = 200; // Tüm blokların ve tahtanın üstünde çıksın
+		AddChild(floatingLabel);
+
+		// Yazıyı tam verilen koordinata ortalamak için ufak bir matematik
+		// (Geçici bir font boyutu tahmini ile ortalıyoruz)
+		floatingLabel.Position = startPosition - new Vector2(text.Length * (settings.FontSize / 4f), settings.FontSize / 2f);
+
+		// GODOT TWEEN (ANİMASYON) MOTORU 
+		Tween tween = CreateTween();
+		tween.SetParallel(true); // Pozisyon ve Saydamlık animasyonları AYNI ANDA çalışsın
+
+		// 1 saniye içinde 120 piksel yukarı süzül
+		tween.TweenProperty(floatingLabel, "position", floatingLabel.Position + new Vector2(0, -120), 1.0f)
+			.SetTrans(Tween.TransitionType.Cubic).SetEase(Tween.EaseType.Out);
+        
+		// 1 saniye içinde yavaşça saydamlaşarak (Alpha = 0) kaybol
+		tween.TweenProperty(floatingLabel, "modulate:a", 0.0f, 1.0f)
+			.SetTrans(Tween.TransitionType.Cubic).SetEase(Tween.EaseType.In);
+
+		// Animasyon bittiği milisaniye objeyi sahnede yok et 
+		tween.Chain().TweenCallback(Callable.From(floatingLabel.QueueFree));
 	}
 
 	private bool CheckForGameOver()
