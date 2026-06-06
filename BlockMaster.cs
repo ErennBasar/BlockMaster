@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 public partial class BlockMaster : Node2D
 {
@@ -20,6 +21,9 @@ public partial class BlockMaster : Node2D
 
 	private readonly float[] _slotXPositions = { 200f, 580f, 960f };
 	private const float SlotYPosition = 1800f;
+	
+	private int _consecutiveHardShapes = 0;
+	private const int PITY_THRESHOLD = 5; // 5 zor şekil sonrası rahatlama
 
 	private int _score = 0;
 	private int _comboStreak = 0;
@@ -322,44 +326,42 @@ public partial class BlockMaster : Node2D
 	
 	private void LoadShapeDatabase()
 	{
-		// KOMBOCU BABALAR (Ağırlık: 40-60)
-		_shapeDatabase.Add(new BlockShape(10, 60, new List<Vector2I> { new Vector2I(-1, 0), new Vector2I(0, 0), new Vector2I(1, 0), new Vector2I(0,1), new Vector2I(1,1), new Vector2I(-1,1), new Vector2I(0,2), new Vector2I(1,2), new Vector2I(-1,2) })); // 3x3 kare
-		_shapeDatabase.Add(new BlockShape(6, 40, new List<Vector2I> { new Vector2I(-1, 0), new Vector2I(0, 0), new Vector2I(1, 0), new Vector2I(2, 0) })); // 4 birim cubuk yatay
-		_shapeDatabase.Add(new BlockShape(11, 40, new List<Vector2I> { new Vector2I(0, 2), new Vector2I(0, 1), new Vector2I(0, 0), new Vector2I(0, -1) })); // 4 birim cubuk dikey
-		_shapeDatabase.Add(new BlockShape(2, 40, new List<Vector2I> { new Vector2I(-1, 0), new Vector2I(0, 0), new Vector2I(1, 0) })); // 3 birim cubuk yatay
-		_shapeDatabase.Add(new BlockShape(11, 40, new List<Vector2I> { new Vector2I(0, 1), new Vector2I(0, 0), new Vector2I(0, -1) })); // 3 birim cubuk dikey
-		_shapeDatabase.Add(new BlockShape(3, 55, new List<Vector2I> { new Vector2I(0, 0), new Vector2I(1, 0), new Vector2I(0, 1), new Vector2I(1, 1) })); // 2x2 Kare
-		_shapeDatabase.Add(new BlockShape(7, 60, new List<Vector2I> { new Vector2I(-1, 0), new Vector2I(0, 0), new Vector2I(1, 0), new Vector2I(0,1), new Vector2I(1,1), new Vector2I(-1,1) })); // 3x2 dikdortgen yatay
-		_shapeDatabase.Add(new BlockShape(11, 60, new List<Vector2I> { new Vector2I(0, 1), new Vector2I(0, 0), new Vector2I(0, -1), new Vector2I(1,0), new Vector2I(1,1), new Vector2I(1,-1) })); // 3x2 dikdortgen dikey
-		_shapeDatabase.Add(new BlockShape(11, 60, new List<Vector2I> { new Vector2I(0, 0), new Vector2I(1, 0) })); // 2x1 Dikdortgen yatay
-		_shapeDatabase.Add(new BlockShape(4, 60, new List<Vector2I> { new Vector2I(0, 0), new Vector2I(0, 1) })); // 2x1 Dikdortgen dikey
+		// KOMBOCU BABALAR 
+		_shapeDatabase.Add(new BlockShape(10, 30, ShapeCategory.ComboMaker,new List<Vector2I> { new Vector2I(-1, 0), new Vector2I(0, 0), new Vector2I(1, 0), new Vector2I(0,1), new Vector2I(1,1), new Vector2I(-1,1), new Vector2I(0,2), new Vector2I(1,2), new Vector2I(-1,2) })); // 3x3 kare
+		_shapeDatabase.Add(new BlockShape(7, 45, ShapeCategory.ComboMaker,new List<Vector2I> { new Vector2I(-1, 0), new Vector2I(0, 0), new Vector2I(1, 0), new Vector2I(0,1), new Vector2I(1,1), new Vector2I(-1,1) })); // 3x2 dikdortgen yatay
+		_shapeDatabase.Add(new BlockShape(11, 45, ShapeCategory.ComboMaker,new List<Vector2I> { new Vector2I(0, 1), new Vector2I(0, 0), new Vector2I(0, -1), new Vector2I(1,0), new Vector2I(1,1), new Vector2I(1,-1) })); // 3x2 dikdortgen dikey
+		_shapeDatabase.Add(new BlockShape(6, 35, ShapeCategory.ComboMaker,new List<Vector2I> { new Vector2I(-2, 0), new Vector2I(-1, 0), new Vector2I(0, 0), new Vector2I(1, 0), new Vector2I(2, 0) })); // 5 birim cubuk yatay
+		_shapeDatabase.Add(new BlockShape(11, 35, ShapeCategory.ComboMaker,new List<Vector2I> { new Vector2I(0, 2), new Vector2I(0, 1), new Vector2I(0, 0), new Vector2I(0, -1), new Vector2I(0, -2) })); // 5 birim cubuk dikey
+		_shapeDatabase.Add(new BlockShape(6, 40, ShapeCategory.ComboMaker,new List<Vector2I> { new Vector2I(-1, 0), new Vector2I(0, 0), new Vector2I(1, 0), new Vector2I(2, 0) })); // 4 birim cubuk yatay
+		_shapeDatabase.Add(new BlockShape(11, 40, ShapeCategory.ComboMaker,new List<Vector2I> { new Vector2I(0, 2), new Vector2I(0, 1), new Vector2I(0, 0), new Vector2I(0, -1) })); // 4 birim cubuk dikey
+		_shapeDatabase.Add(new BlockShape(2, 55, ShapeCategory.ComboMaker,new List<Vector2I> { new Vector2I(-1, 0), new Vector2I(0, 0), new Vector2I(1, 0) })); // 3 birim cubuk yatay
+		_shapeDatabase.Add(new BlockShape(11, 55, ShapeCategory.ComboMaker,new List<Vector2I> { new Vector2I(0, 1), new Vector2I(0, 0), new Vector2I(0, -1) })); // 3 birim cubuk dikey
+		_shapeDatabase.Add(new BlockShape(3, 55, ShapeCategory.ComboMaker,new List<Vector2I> { new Vector2I(0, 0), new Vector2I(1, 0), new Vector2I(0, 1), new Vector2I(1, 1) })); // 2x2 Kare
 		
-		// ORTA ŞEKİLLER (Ağırlık: 20-35)
-		_shapeDatabase.Add(new BlockShape(6, 35, new List<Vector2I> { new Vector2I(-2, 0), new Vector2I(-1, 0), new Vector2I(0, 0), new Vector2I(1, 0), new Vector2I(2, 0) })); // 5 birim cubuk yatay
-		_shapeDatabase.Add(new BlockShape(11, 35, new List<Vector2I> { new Vector2I(0, 2), new Vector2I(0, 1), new Vector2I(0, 0), new Vector2I(0, -1), new Vector2I(0, -2) })); // 5 birim cubuk dikey
-		_shapeDatabase.Add(new BlockShape(8, 25, new List<Vector2I> {  new Vector2I(-1, 0), new Vector2I(0, 0), new Vector2I(1,0), new Vector2I(0,1) })); // T
-		_shapeDatabase.Add(new BlockShape(8, 25, new List<Vector2I> {  new Vector2I(-1, 0), new Vector2I(0, 0), new Vector2I(1,0), new Vector2I(0,-1) })); // ters T
-		_shapeDatabase.Add(new BlockShape(8, 25, new List<Vector2I> {  new Vector2I(-1, 0), new Vector2I(0, 0), new Vector2I(0, 1), new Vector2I(0,-1) })); // sol T
-		_shapeDatabase.Add(new BlockShape(8, 25, new List<Vector2I> {  new Vector2I(1, 0), new Vector2I(0, 0), new Vector2I(0, 1), new Vector2I(0,-1) })); // sag T
-		_shapeDatabase.Add(new BlockShape(5, 20, new List<Vector2I> { new Vector2I(0, 0), new Vector2I(1, 0), new Vector2I(2, 0), new Vector2I(0, -1), new Vector2I(0, -2) })); // Uzun L (5 birim)
-		_shapeDatabase.Add(new BlockShape(11, 20, new List<Vector2I> { new Vector2I(0, 0), new Vector2I(0, 1), new Vector2I(0, 2), new Vector2I(1, 0), new Vector2I(2, 0) })); // Uzun L 90deg (5 birim)
-		_shapeDatabase.Add(new BlockShape(11, 20, new List<Vector2I> { new Vector2I(0, 0), new Vector2I(0, 1), new Vector2I(0, 2), new Vector2I(-1, 0), new Vector2I(-2, 0) })); // Uzun L 180deg (5 birim)
-		_shapeDatabase.Add(new BlockShape(11, 20, new List<Vector2I> { new Vector2I(0, 0), new Vector2I(0, -1), new Vector2I(0, -2), new Vector2I(-1, 0), new Vector2I(-2, 0) })); // Uzun L 270deg (5 birim)
-		_shapeDatabase.Add(new BlockShape(1, 20, new List<Vector2I> { new Vector2I(0, 0), new Vector2I(1, 0), new Vector2I(0, -1), new Vector2I(0, -2) })); // Kisa L (4 birim)
-		_shapeDatabase.Add(new BlockShape(11, 20, new List<Vector2I> { new Vector2I(0, 0), new Vector2I(1, 0), new Vector2I(2, 0), new Vector2I(0, 1) })); // Kisa L 90deg (4 birim)
-		_shapeDatabase.Add(new BlockShape(11, 20, new List<Vector2I> { new Vector2I(0, 0), new Vector2I(0, 1), new Vector2I(0, 2), new Vector2I(-1, 0) })); // Kisa L 180deg (4 birim)
-		_shapeDatabase.Add(new BlockShape(11, 20, new List<Vector2I> { new Vector2I(0, 0), new Vector2I(0, -1), new Vector2I(-2, 0), new Vector2I(-1, 0) })); // Kisa L 270deg (4 birim)
-		_shapeDatabase.Add(new BlockShape(11, 20, new List<Vector2I> { new Vector2I(0, 0), new Vector2I(0, -1), new Vector2I(1, 0) })); // Mini L (3 birim)
-		_shapeDatabase.Add(new BlockShape(11, 20, new List<Vector2I> { new Vector2I(0, 0), new Vector2I(0, 1), new Vector2I(1, 0) })); // Mini L 90deg (3 birim)
-		_shapeDatabase.Add(new BlockShape(11, 20, new List<Vector2I> { new Vector2I(0, 0), new Vector2I(0, 1), new Vector2I(-1, 0) })); // Mini L 180deg (3 birim)
-		_shapeDatabase.Add(new BlockShape(11, 20, new List<Vector2I> { new Vector2I(0, 0), new Vector2I(0, -1), new Vector2I(-1, 0) })); // Mini L 270deg (3 birim)
+		// ORTA ŞEKİLLER 
+		_shapeDatabase.Add(new BlockShape(8, 25, ShapeCategory.Medium,new List<Vector2I> {  new Vector2I(-1, 0), new Vector2I(0, 0), new Vector2I(1,0), new Vector2I(0,1) })); // T
+		_shapeDatabase.Add(new BlockShape(8, 25, ShapeCategory.Medium,new List<Vector2I> {  new Vector2I(-1, 0), new Vector2I(0, 0), new Vector2I(1,0), new Vector2I(0,-1) })); // ters T
+		_shapeDatabase.Add(new BlockShape(8, 25, ShapeCategory.Medium,new List<Vector2I> {  new Vector2I(-1, 0), new Vector2I(0, 0), new Vector2I(0, 1), new Vector2I(0,-1) })); // sol T
+		_shapeDatabase.Add(new BlockShape(8, 25, ShapeCategory.Medium,new List<Vector2I> {  new Vector2I(1, 0), new Vector2I(0, 0), new Vector2I(0, 1), new Vector2I(0,-1) })); // sag T
+		_shapeDatabase.Add(new BlockShape(5, 15, ShapeCategory.Medium,new List<Vector2I> { new Vector2I(0, 0), new Vector2I(1, 0), new Vector2I(2, 0), new Vector2I(0, -1), new Vector2I(0, -2) })); // Uzun L (5 birim)
+		_shapeDatabase.Add(new BlockShape(11, 15, ShapeCategory.Medium,new List<Vector2I> { new Vector2I(0, 0), new Vector2I(0, 1), new Vector2I(0, 2), new Vector2I(-1, 0), new Vector2I(-2, 0) })); // Uzun L 180deg (5 birim)
+		_shapeDatabase.Add(new BlockShape(1, 20, ShapeCategory.Medium,new List<Vector2I> { new Vector2I(0, 0), new Vector2I(1, 0), new Vector2I(0, -1), new Vector2I(0, -2) })); // Kisa L (4 birim)
+		_shapeDatabase.Add(new BlockShape(11, 20, ShapeCategory.Medium,new List<Vector2I> { new Vector2I(0, 0), new Vector2I(1, 0), new Vector2I(2, 0), new Vector2I(0, 1) })); // Kisa L 90deg (4 birim)
+		_shapeDatabase.Add(new BlockShape(11, 20, ShapeCategory.Medium,new List<Vector2I> { new Vector2I(0, 0), new Vector2I(0, 1), new Vector2I(0, 2), new Vector2I(-1, 0) })); // Kisa L 180deg (4 birim)
+		_shapeDatabase.Add(new BlockShape(11, 20, ShapeCategory.Medium,new List<Vector2I> { new Vector2I(0, 0), new Vector2I(0, -1), new Vector2I(-2, 0), new Vector2I(-1, 0) })); // Kisa L 270deg (4 birim)
 		
-		// PİS ŞEKİLLER (Ağırlık: 5-10)
-		_shapeDatabase.Add(new BlockShape(11, 20, new List<Vector2I> { new Vector2I(0, 0), new Vector2I(0, -1), new Vector2I(-1, -1), new Vector2I(1, 0) })); // Z 
-		_shapeDatabase.Add(new BlockShape(11, 20, new List<Vector2I> { new Vector2I(0, 0), new Vector2I(0, 1), new Vector2I(1, -1), new Vector2I(1, 0) })); // Z 90deg 
+		// KUCUK SEKILLER
+		_shapeDatabase.Add(new BlockShape(11, 20, ShapeCategory.Small,new List<Vector2I> { new Vector2I(0, 0), new Vector2I(0, 1), new Vector2I(1, 0) })); // Mini L 90deg (3 birim)
+		_shapeDatabase.Add(new BlockShape(11, 20, ShapeCategory.Small,new List<Vector2I> { new Vector2I(0, 0), new Vector2I(0, -1), new Vector2I(-1, 0) })); // Mini L 270deg (3 birim)
+		_shapeDatabase.Add(new BlockShape(11, 45, ShapeCategory.Small,new List<Vector2I> { new Vector2I(0, 0), new Vector2I(1, 0) })); // 2x1 Dikdortgen yatay
+		_shapeDatabase.Add(new BlockShape(4, 45, ShapeCategory.Small,new List<Vector2I> { new Vector2I(0, 0), new Vector2I(0, 1) })); // 2x1 Dikdortgen dikey
 		
-		// O.Ç ŞEKİL (Ağırlık: 5)
-		_shapeDatabase.Add(new BlockShape(9, 5,new List<Vector2I> { new Vector2I(1, -1), new Vector2I(0, 0), new Vector2I(-1, 1) })); // o.ç 
+		
+		// PİS ŞEKİLLER 
+		_shapeDatabase.Add(new BlockShape(9, 5, ShapeCategory.Nasty,new List<Vector2I> { new Vector2I(1, -1), new Vector2I(0, 0), new Vector2I(-1, 1) })); // o.ç 
+		_shapeDatabase.Add(new BlockShape(11, 10, ShapeCategory.Small,new List<Vector2I> { new Vector2I(0, 0), new Vector2I(0, 1), new Vector2I(-1, 1), new Vector2I(1, 0) })); // S 
+		_shapeDatabase.Add(new BlockShape(11, 10, ShapeCategory.Small,new List<Vector2I> { new Vector2I(0, 0), new Vector2I(0, -1), new Vector2I(-1, -1), new Vector2I(1, 0) })); // Z 
+		_shapeDatabase.Add(new BlockShape(11, 10, ShapeCategory.Small,new List<Vector2I> { new Vector2I(0, 0), new Vector2I(0, 1), new Vector2I(1, -1), new Vector2I(1, 0) })); // Z 90deg 
 	}
 	
 	// --- ÜRETİM SİSTEMİ ---
@@ -499,7 +501,7 @@ public partial class BlockMaster : Node2D
 		// Şeklin orijinalini bozmamak için koordinat listesinin bir kopyasını alıyoruz!
 		List<Vector2I> clonedCoords = new List<Vector2I>(templateShape.LocalCoordinates);
 	   
-		newBlock.ShapeData = new BlockShape(templateShape.BlockId,templateShape.Weight, clonedCoords);
+		newBlock.ShapeData = new BlockShape(templateShape.BlockId, templateShape.Weight, templateShape.Category, clonedCoords);
 		newBlock.SlotIndex = slotIndex;
 		
 		// Blok doğar doğmaz boyutunu %50 küçültüyoruz ki ekrana sığsın
@@ -649,80 +651,89 @@ public partial class BlockMaster : Node2D
 
 	private BlockShape GetDynamicRandomShape()
 	{
-		float fullnes = GetBoardFullnessRatio();
-		int totalDynamicWeight = 0;
-
-		Dictionary<BlockShape, int> dynamicWeights = new Dictionary<BlockShape, int>();
-
-		foreach (BlockShape shape in _shapeDatabase)
+		float fullness = GetBoardFullnessRatio();
+		
+		if (_consecutiveHardShapes >= PITY_THRESHOLD)
 		{
-			int currentWeight = shape.Weight;
-
-			if (fullnes < 0.35f)
-			{
-				if (currentWeight >= 50)
-				{
-					currentWeight *= 2;
-				}
-			}
-			else if (fullnes > 0.65f)
-			{
-				// Tahta dolu. Oyuncuyu kurtar.
-				if (currentWeight >= 50) 
-				{
-					currentWeight = 1;
-				}
-
-				if (currentWeight <= 15) 
-				{
-					currentWeight *= 4;
-				}
-			}
-
-			dynamicWeights[shape] = currentWeight;
-			totalDynamicWeight += currentWeight;
+			_consecutiveHardShapes = 0;
+			var easyShapes = _shapeDatabase
+				.Where(s => s.Category == ShapeCategory.ComboMaker ||
+				            s.Category == ShapeCategory.Small)
+				.ToList();
+			return easyShapes[Random.Shared.Next(easyShapes.Count)];
 		}
 		
-		// Yeni manipule edilmis agiliklara gore duzenleme
-		Random random = new Random();
-		int randomValue = random.Next(0, totalDynamicWeight);
+		int totalDynamicWeight = 0;
 
+		Dictionary<BlockShape, int> dynamicWeights = new();
+
+		foreach (BlockShape shape in _shapeDatabase)
+	    {
+	        int currentWeight = shape.Weight;
+
+	        if (fullness < 0.25f)
+	        {
+	            // ── OYUN BAŞI: Kombo yağmuru ────────────────────────
+	            currentWeight = shape.Category switch
+	            {
+	                ShapeCategory.ComboMaker => currentWeight * 3,   // Büyükleri 3 kat artır
+	                ShapeCategory.Medium => currentWeight / 2,   // Ortaları yarıya indir
+	                ShapeCategory.Small => 0,                   // Mini şekil yok
+	                ShapeCategory.Nasty => 0,                   // Pis şekil yok
+	                _ => currentWeight
+	            };
+	        }
+	        else if (fullness <= 0.65f)
+	        {
+	            // ── ORTA OYUN: Dengeli ──────────────────────────────
+	            currentWeight = shape.Category switch
+	            {
+	                ShapeCategory.ComboMaker => currentWeight,
+	                ShapeCategory.Medium => (int)(currentWeight * 1.3f),
+	                ShapeCategory.Small => currentWeight,
+	                ShapeCategory.Nasty => currentWeight / 3,   // Pisleri bastır
+	                _ => currentWeight
+	            };
+	        }
+	        else
+	        {
+	            // ── TAHTA DOLU: Hayat kurtar ─────────────────────────
+	            int cellCount = shape.LocalCoordinates.Count;
+	            currentWeight = shape.Category switch
+	            {
+	                ShapeCategory.ComboMaker => cellCount >= 6 ? 1 : currentWeight / 3,
+	                ShapeCategory.Medium => (int)(currentWeight * 1.5f),
+	                ShapeCategory.Small => currentWeight * 5,   // Küçükleri şelale gibi akıt
+	                ShapeCategory.Nasty => 0,                   // Doluyken pis şekil = game over
+	                _ => currentWeight
+	            };
+	        }
+
+	        if (currentWeight > 0)
+	        {
+	            dynamicWeights[shape] = currentWeight;
+	            totalDynamicWeight += currentWeight;
+	        }
+	    }
+
+		if (totalDynamicWeight == 0) return _shapeDatabase[0];
+
+		int randomValue = Random.Shared.Next(0, totalDynamicWeight);
 		int cumulativeWeight = 0;
+		BlockShape selected = _shapeDatabase[0];
+    
 		foreach (var kvp in dynamicWeights)
-		{
-			cumulativeWeight += kvp.Value;
-			if (randomValue < cumulativeWeight)
-			{
-				return kvp.Key;
-			}
-		}
+	    {
+	        cumulativeWeight += kvp.Value;
+	        if (randomValue < cumulativeWeight)
+	            return kvp.Key;
+	    }
 
-		return _shapeDatabase[0];
+		bool isHard = selected.Category == ShapeCategory.Nasty ||
+		              selected.LocalCoordinates.Count >= 6;
+		_consecutiveHardShapes = isHard ? _consecutiveHardShapes + 1 : 0;
 
-		// Tum sekillerin agirliklari toplami
-		// int totalWeight = 0;
-		// foreach (BlockShape shape in _shapeDatabase)
-		// {
-		// 	totalWeight += shape.Weight;
-		// }
-		//
-		// // 0 ile toplam agirlik arasinda rastgele bir zar atilir
-		// Random random = new Random();
-		// int randomValue = random.Next(0, totalWeight);
-		//
-		// // 3. Pastadan dilimleri çıkararak hangi şekle denk geldiğimizi bul
-		// int currentWeight = 0;
-		// foreach (BlockShape shape in _shapeDatabase)
-		// {
-		// 	currentWeight += shape.Weight;
-		// 	if (randomValue < currentWeight)
-		// 	{
-		// 		return shape; // Zar bu şeklin dilimine denk geldi!
-		// 	}
-		// }
-		//
-		// // Teorik olarak buraya hiç düşmemesi lazım ama kod hata vermesin diye ilk şekli dönüyoruz
-		// return _shapeDatabase[0];
+		return selected;
 	}
 
 	private float GetBoardFullnessRatio()
