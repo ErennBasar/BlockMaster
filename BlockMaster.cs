@@ -750,6 +750,8 @@ public partial class BlockMaster : Node2D
 		settings.OutlineColor = new Color(0, 0, 0, 0.8f); // Yazı okunsun diye kalın siyah kenarlık
 		floatingLabel.LabelSettings = settings;
 
+		floatingLabel.MouseFilter = Control.MouseFilterEnum.Ignore;
+
 		floatingLabel.ZIndex = 200; // Tüm blokların ve tahtanın üstünde çıksın
 		AddChild(floatingLabel);
 

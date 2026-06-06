@@ -135,38 +135,53 @@ public partial class DraggableBlock : Area2D
 				// Blogu havaya kaldirma hissiyati, Z ekseninde en one aliyoruz
 				ZIndex = 100;
 			}
-			else
-			{
-				if (!_isDragging)
-				{
-					return;
-				}
-				// Tiklama bittiginde
-				_isDragging = false;
-				ZIndex = 0; // Eski katmanina geri doner
-			 
-				// Parmağın basıldığı yer ile çekildiği yer arasındaki piksel mesafesini ölçüyoruz
-				float dragDistance = mouseEvent.GlobalPosition.DistanceTo(_touchStartPos);
-
-				// Blok dondurmeyi iptal ettik. Daha sonra puan karsiligi aktif olacak bir ozellik olacak
-				
-				// Eğer oyuncu bloğu 15 pikselden daha az hareket ettirdiyse bu bir SÜRÜKLEME değil, TIKLAMADIR!
-				// if (dragDistance < 15f)
-				// {
-				// 	GD.Print("Blok üzerinde kısa tık algılandı! Döndürülüyor...");
-				// 	Rotate90Degrees();
-				// 	
-				// 	// BlockMaster'a "Ben döndüm, merkezim kaydı, beni düzelt!" diye haber veriyoruz.
-				// 	OnBlockRotated?.Invoke(this);
-				// 	
-				// 	return; // Metottan erken çıkıyoruz ki tahtaya bırakma (Drop) kodu tetiklenmesin!
-				// }
-
-				// Eğer 15 pikselden fazla hareket ettirdiyse bu normal sürüklemedir, tahtaya yerleştirmeyi dene:
-				OnBlockDropped?.Invoke(this, GlobalPosition);
-			}
+			// else
+			// {
+			// 	if (!_isDragging)
+			// 	{
+			// 		return;
+			// 	}
+			// 	// Tiklama bittiginde
+			// 	_isDragging = false;
+			// 	ZIndex = 0; // Eski katmanina geri doner
+			//  
+			// 	// Parmağın basıldığı yer ile çekildiği yer arasındaki piksel mesafesini ölçüyoruz
+			// 	float dragDistance = mouseEvent.GlobalPosition.DistanceTo(_touchStartPos);
+			//
+			// 	// Blok dondurmeyi iptal ettik. Daha sonra puan karsiligi aktif olacak bir ozellik olacak
+			// 	
+			// 	// Eğer oyuncu bloğu 15 pikselden daha az hareket ettirdiyse bu bir SÜRÜKLEME değil, TIKLAMADIR!
+			// 	// if (dragDistance < 15f)
+			// 	// {
+			// 	// 	GD.Print("Blok üzerinde kısa tık algılandı! Döndürülüyor...");
+			// 	// 	Rotate90Degrees();
+			// 	// 	
+			// 	// 	// BlockMaster'a "Ben döndüm, merkezim kaydı, beni düzelt!" diye haber veriyoruz.
+			// 	// 	OnBlockRotated?.Invoke(this);
+			// 	// 	
+			// 	// 	return; // Metottan erken çıkıyoruz ki tahtaya bırakma (Drop) kodu tetiklenmesin!
+			// 	// }
+			//
+			// 	// Eğer 15 pikselden fazla hareket ettirdiyse bu normal sürüklemedir, tahtaya yerleştirmeyi dene:
+			// 	OnBlockDropped?.Invoke(this, GlobalPosition);
+			// }
 		}
 	}
+	
+	// Release event
+	public override void _Input(InputEvent @event)
+	{
+		// Eğer blok zaten sürükleniyorsa ve ekrandan parmak çekildiyse (Pressed == false)
+		if (_isDragging && @event is InputEventMouseButton mouseEvent && mouseEvent.ButtonIndex == MouseButton.Left && !mouseEvent.Pressed)
+		{
+			_isDragging = false;
+			ZIndex = 0;
+        
+			// Bloğu tahtaya bırakmayı dene
+			OnBlockDropped?.Invoke(this, GlobalPosition);
+		}
+	}
+	
 	// public override void _UnhandledInput(InputEvent @event)
 	// {
 	// 	if (@event is InputEventMouseButton mouseEvent && mouseEvent.Pressed)
