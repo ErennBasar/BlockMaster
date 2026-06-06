@@ -75,6 +75,7 @@ public partial class DraggableBlock : Area2D
 				8 => new Color(0.502f, 0.608f, 0.808f), // Mavi
 				9 => new Color(0.243f, 0.71f, 0.616f), // bmw yesili
 				10 => new Color(0.243f, 0.71f, 0.616f), // bmw yesili
+				11 => new Color(1f, 0.9f, 0f), // Sari
 				_ => new Color(0.8f, 0.2f, 0.2f)  // Varsayılan Kırmızı
 			};
 			

@@ -322,21 +322,41 @@ public partial class BlockMaster : Node2D
 	
 	private void LoadShapeDatabase()
 	{
-		// KOMBOCU BABLAR (Ağırlık: 50-60)
+		// KOMBOCU BABALAR (Ağırlık: 40-60)
 		_shapeDatabase.Add(new BlockShape(10, 60, new List<Vector2I> { new Vector2I(-1, 0), new Vector2I(0, 0), new Vector2I(1, 0), new Vector2I(0,1), new Vector2I(1,1), new Vector2I(-1,1), new Vector2I(0,2), new Vector2I(1,2), new Vector2I(-1,2) })); // 3x3 kare
-		_shapeDatabase.Add(new BlockShape(6, 50, new List<Vector2I> { new Vector2I(-1, 0), new Vector2I(0, 0), new Vector2I(1, 0), new Vector2I(2, 0) })); // 4 birim cubuk
-		_shapeDatabase.Add(new BlockShape(6, 50, new List<Vector2I> { new Vector2I(-2, 0), new Vector2I(-1, 0), new Vector2I(0, 0), new Vector2I(1, 0), new Vector2I(2, 0) })); // 5 birim cubuk
-		_shapeDatabase.Add(new BlockShape(2, 50, new List<Vector2I> { new Vector2I(-1, 0), new Vector2I(0, 0), new Vector2I(1, 0) })); // 3 birim cubuk
+		_shapeDatabase.Add(new BlockShape(6, 40, new List<Vector2I> { new Vector2I(-1, 0), new Vector2I(0, 0), new Vector2I(1, 0), new Vector2I(2, 0) })); // 4 birim cubuk yatay
+		_shapeDatabase.Add(new BlockShape(11, 40, new List<Vector2I> { new Vector2I(0, 2), new Vector2I(0, 1), new Vector2I(0, 0), new Vector2I(0, -1) })); // 4 birim cubuk dikey
+		_shapeDatabase.Add(new BlockShape(2, 40, new List<Vector2I> { new Vector2I(-1, 0), new Vector2I(0, 0), new Vector2I(1, 0) })); // 3 birim cubuk yatay
+		_shapeDatabase.Add(new BlockShape(11, 40, new List<Vector2I> { new Vector2I(0, 1), new Vector2I(0, 0), new Vector2I(0, -1) })); // 3 birim cubuk dikey
 		_shapeDatabase.Add(new BlockShape(3, 55, new List<Vector2I> { new Vector2I(0, 0), new Vector2I(1, 0), new Vector2I(0, 1), new Vector2I(1, 1) })); // 2x2 Kare
-		_shapeDatabase.Add(new BlockShape(7, 60, new List<Vector2I> { new Vector2I(-1, 0), new Vector2I(0, 0), new Vector2I(1, 0), new Vector2I(0,1), new Vector2I(1,1), new Vector2I(-1,1) })); // 3x2 dikdortgen
+		_shapeDatabase.Add(new BlockShape(7, 60, new List<Vector2I> { new Vector2I(-1, 0), new Vector2I(0, 0), new Vector2I(1, 0), new Vector2I(0,1), new Vector2I(1,1), new Vector2I(-1,1) })); // 3x2 dikdortgen yatay
+		_shapeDatabase.Add(new BlockShape(11, 60, new List<Vector2I> { new Vector2I(0, 1), new Vector2I(0, 0), new Vector2I(0, -1), new Vector2I(1,0), new Vector2I(1,1), new Vector2I(1,-1) })); // 3x2 dikdortgen dikey
+		_shapeDatabase.Add(new BlockShape(11, 60, new List<Vector2I> { new Vector2I(0, 0), new Vector2I(1, 0) })); // 2x1 Dikdortgen yatay
+		_shapeDatabase.Add(new BlockShape(4, 60, new List<Vector2I> { new Vector2I(0, 0), new Vector2I(0, 1) })); // 2x1 Dikdortgen dikey
 		
-		// ORTA ŞEKİLLER (Ağırlık: 20-30)
-		_shapeDatabase.Add(new BlockShape(4, 35, new List<Vector2I> { new Vector2I(0, 0), new Vector2I(0, 1) })); // 2x1 Dikdortgen
-		_shapeDatabase.Add(new BlockShape(8, 30, new List<Vector2I> { new Vector2I(0, 0), new Vector2I(0, 1), new Vector2I(1,0), new Vector2I(-1,0) })); // T
-		_shapeDatabase.Add(new BlockShape(5, 25, new List<Vector2I> { new Vector2I(0, 0), new Vector2I(1, 0), new Vector2I(2, 0), new Vector2I(0, -1), new Vector2I(0, -2) })); // Uzun L
-		_shapeDatabase.Add(new BlockShape(1, 25, new List<Vector2I> { new Vector2I(0, 0), new Vector2I(1, 0), new Vector2I(2, 0), new Vector2I(0, -1) })); // Kisa L
+		// ORTA ŞEKİLLER (Ağırlık: 20-35)
+		_shapeDatabase.Add(new BlockShape(6, 35, new List<Vector2I> { new Vector2I(-2, 0), new Vector2I(-1, 0), new Vector2I(0, 0), new Vector2I(1, 0), new Vector2I(2, 0) })); // 5 birim cubuk yatay
+		_shapeDatabase.Add(new BlockShape(11, 35, new List<Vector2I> { new Vector2I(0, 2), new Vector2I(0, 1), new Vector2I(0, 0), new Vector2I(0, -1), new Vector2I(0, -2) })); // 5 birim cubuk dikey
+		_shapeDatabase.Add(new BlockShape(8, 25, new List<Vector2I> {  new Vector2I(-1, 0), new Vector2I(0, 0), new Vector2I(1,0), new Vector2I(0,1) })); // T
+		_shapeDatabase.Add(new BlockShape(8, 25, new List<Vector2I> {  new Vector2I(-1, 0), new Vector2I(0, 0), new Vector2I(1,0), new Vector2I(0,-1) })); // ters T
+		_shapeDatabase.Add(new BlockShape(8, 25, new List<Vector2I> {  new Vector2I(-1, 0), new Vector2I(0, 0), new Vector2I(0, 1), new Vector2I(0,-1) })); // sol T
+		_shapeDatabase.Add(new BlockShape(8, 25, new List<Vector2I> {  new Vector2I(1, 0), new Vector2I(0, 0), new Vector2I(0, 1), new Vector2I(0,-1) })); // sag T
+		_shapeDatabase.Add(new BlockShape(5, 20, new List<Vector2I> { new Vector2I(0, 0), new Vector2I(1, 0), new Vector2I(2, 0), new Vector2I(0, -1), new Vector2I(0, -2) })); // Uzun L (5 birim)
+		_shapeDatabase.Add(new BlockShape(11, 20, new List<Vector2I> { new Vector2I(0, 0), new Vector2I(0, 1), new Vector2I(0, 2), new Vector2I(1, 0), new Vector2I(2, 0) })); // Uzun L 90deg (5 birim)
+		_shapeDatabase.Add(new BlockShape(11, 20, new List<Vector2I> { new Vector2I(0, 0), new Vector2I(0, 1), new Vector2I(0, 2), new Vector2I(-1, 0), new Vector2I(-2, 0) })); // Uzun L 180deg (5 birim)
+		_shapeDatabase.Add(new BlockShape(11, 20, new List<Vector2I> { new Vector2I(0, 0), new Vector2I(0, -1), new Vector2I(0, -2), new Vector2I(-1, 0), new Vector2I(-2, 0) })); // Uzun L 270deg (5 birim)
+		_shapeDatabase.Add(new BlockShape(1, 20, new List<Vector2I> { new Vector2I(0, 0), new Vector2I(1, 0), new Vector2I(0, -1), new Vector2I(0, -2) })); // Kisa L (4 birim)
+		_shapeDatabase.Add(new BlockShape(11, 20, new List<Vector2I> { new Vector2I(0, 0), new Vector2I(1, 0), new Vector2I(2, 0), new Vector2I(0, 1) })); // Kisa L 90deg (4 birim)
+		_shapeDatabase.Add(new BlockShape(11, 20, new List<Vector2I> { new Vector2I(0, 0), new Vector2I(0, 1), new Vector2I(0, 2), new Vector2I(-1, 0) })); // Kisa L 180deg (4 birim)
+		_shapeDatabase.Add(new BlockShape(11, 20, new List<Vector2I> { new Vector2I(0, 0), new Vector2I(0, -1), new Vector2I(-2, 0), new Vector2I(-1, 0) })); // Kisa L 270deg (4 birim)
+		_shapeDatabase.Add(new BlockShape(11, 20, new List<Vector2I> { new Vector2I(0, 0), new Vector2I(0, -1), new Vector2I(1, 0) })); // Mini L (3 birim)
+		_shapeDatabase.Add(new BlockShape(11, 20, new List<Vector2I> { new Vector2I(0, 0), new Vector2I(0, 1), new Vector2I(1, 0) })); // Mini L 90deg (3 birim)
+		_shapeDatabase.Add(new BlockShape(11, 20, new List<Vector2I> { new Vector2I(0, 0), new Vector2I(0, 1), new Vector2I(-1, 0) })); // Mini L 180deg (3 birim)
+		_shapeDatabase.Add(new BlockShape(11, 20, new List<Vector2I> { new Vector2I(0, 0), new Vector2I(0, -1), new Vector2I(-1, 0) })); // Mini L 270deg (3 birim)
 		
 		// PİS ŞEKİLLER (Ağırlık: 5-10)
+		_shapeDatabase.Add(new BlockShape(11, 20, new List<Vector2I> { new Vector2I(0, 0), new Vector2I(0, -1), new Vector2I(-1, -1), new Vector2I(1, 0) })); // Z 
+		_shapeDatabase.Add(new BlockShape(11, 20, new List<Vector2I> { new Vector2I(0, 0), new Vector2I(0, 1), new Vector2I(1, -1), new Vector2I(1, 0) })); // Z 90deg 
 		
 		// O.Ç ŞEKİL (Ağırlık: 5)
 		_shapeDatabase.Add(new BlockShape(9, 5,new List<Vector2I> { new Vector2I(1, -1), new Vector2I(0, 0), new Vector2I(-1, 1) })); // o.ç 
@@ -380,6 +400,7 @@ public partial class BlockMaster : Node2D
 			8 => new Color(0.502f, 0.608f, 0.808f), // Mavi
 			9 => new Color(0.243f, 0.71f, 0.616f), // BMW yesili
 			10 => new Color(0.243f, 0.71f, 0.616f), // BMW yesili
+			11 => new Color(1f, 0.9f, 0f), // Sari
 			_ => new Color(0.2f, 0.2f, 0.2f)
 		};
 	}
