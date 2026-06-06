@@ -657,8 +657,7 @@ public partial class BlockMaster : Node2D
 		{
 			_consecutiveHardShapes = 0;
 			var easyShapes = _shapeDatabase
-				.Where(s => s.Category == ShapeCategory.ComboMaker ||
-				            s.Category == ShapeCategory.Small)
+				.Where(s => s.Category == ShapeCategory.Small)
 				.ToList();
 			return easyShapes[Random.Shared.Next(easyShapes.Count)];
 		}
@@ -726,7 +725,10 @@ public partial class BlockMaster : Node2D
 	    {
 	        cumulativeWeight += kvp.Value;
 	        if (randomValue < cumulativeWeight)
-	            return kvp.Key;
+	        {
+		        selected = kvp.Key; // Şekli bulduk, kaydettik
+		        break; 
+	        }
 	    }
 
 		bool isHard = selected.Category == ShapeCategory.Nasty ||
