@@ -11,6 +11,9 @@ public partial class BlockMaster : Node2D
 	
 	// Renkli kutucuklari tutacak matris
 	private Panel[,] _visualGrid = new Panel[8, 8];
+	private Panel[,] _bodyGrid  = new Panel[8, 8];
+	private float _cellActualSize;
+	private const float BodyHeight = 5f;
 
 	private List<ColorPalette> _themeDatabase;
 	private ColorPalette _currentTheme;
@@ -51,29 +54,26 @@ public partial class BlockMaster : Node2D
 	{
 		_themeDatabase = new List<ColorPalette>
 		{
-			// TEMA 1: Klasik Blok Şöleni (Canlı ve Enerjik)
+			
 			new ColorPalette(
-				new Color("#FF3366"), // Combo: Tatlı Kırmızı
-				new Color("#00C4FF"), // Medium: Açık Mavi
-				new Color("#00FF66"), // Small: Fosforlu Yeşil
-				new Color("#8A2BE2") // Nasty: Zehirli Mor
+				new Color("#fdf0d5"), 
+				new Color("#f18701"), 
+				new Color("#669bbc"), 
+				new Color("#dda15e"),
+				new Color("#3d348b"),
+				new Color("#7678ed")
 			),
-			// TEMA 2: Karanlık Siberpunk (Gece modu)
 			new ColorPalette(
-				new Color("#FF007F"), // Combo: Neon Pembe
-				new Color("#00F0FF"), // Medium: Siber Mavi
-				new Color("#FDF900"), // Small: Neon Sarı
-				new Color("#FF3300") // Nasty: Uyarı Kırmızısı
+				new Color("#48cae4"), 
+				new Color("#ef476f"), 
+				new Color("#caf0f8"), 
+				new Color("#ade8f4"),
+				new Color("#33415c"),
+				new Color("#5c677d")
 			),
-			// TEMA 3: Pastel Rüyası (Göz yormayan, chill mood)
-			new ColorPalette(
-				new Color("#FFB5E8"), // Combo: Pastel Pembe
-				new Color("#85E3FF"), // Medium: Bebek Mavisi
-				new Color("#B9FFB0"), // Small: Mint Yeşili
-				new Color("#CBAACB") // Nasty: Pastel Mor
-			)
 		};
 		_currentTheme = _themeDatabase[Random.Shared.Next(_themeDatabase.Count)];
+		RenderingServer.SetDefaultClearColor(_currentTheme.BgColor);
 		
 		InitializeGrid();
 		DrawGridVisuals(); // Calisir calismaz pikselleri erkana basar
@@ -305,35 +305,66 @@ public partial class BlockMaster : Node2D
 
 	private void DrawGridVisuals()
 	{
-		for (int x = 0; x < 8; x++)
-		{
-			for (int y = 0; y < 8; y++)
-			{
-				Panel rect = new Panel();
-				rect.Size = new Vector2(CellSize, CellSize);
-				rect.Position = new Vector2(GridStartX + (x * Step), GridStartY + (y * Step));
+		
+		// ── 1. ANA OYUN TAHTASI ÇERÇEVESİ (KASA/BOARD FRAME) ──
+	    float padding = 12f; 
+	    Panel boardFrame = new Panel();
+	    boardFrame.Size = new Vector2((8 * Step) + (padding * 2), (8 * Step) + (padding * 2));
+	    boardFrame.Position = new Vector2(GridStartX - padding, GridStartY - padding);
 
-				StyleBoxFlat style = new StyleBoxFlat();
-				style.BgColor = new Color(0.2f, 0.2f, 0.2f);
-			 
-				// Tahtadaki boş yuvaların da havalı siyah kenarlıkları ve oval köşeleri olsun
-				style.BorderWidthTop = 4;
-				style.BorderWidthBottom = 4;
-				style.BorderWidthLeft = 4;
-				style.BorderWidthRight = 4;
-				style.BorderColor = new Color(0.1f, 0.1f, 0.1f, 0.8f); 
-			 
-				style.CornerRadiusTopLeft = 12;
-				style.CornerRadiusTopRight = 12;
-				style.CornerRadiusBottomLeft = 12;
-				style.CornerRadiusBottomRight = 12;
+	    StyleBoxFlat frameStyle = new StyleBoxFlat();
+	    Color frameColor = GetColorForBlock(0).Darkened(0.08f); 
+	    frameStyle.BgColor = frameColor;
+	   
+	    frameStyle.CornerRadiusTopLeft = 16;
+	    frameStyle.CornerRadiusTopRight = 16;
+	    frameStyle.CornerRadiusBottomLeft = 16;
+	    frameStyle.CornerRadiusBottomRight = 16;
 
-				rect.AddThemeStyleboxOverride("panel", style);
-			 
-				AddChild(rect);
-				_visualGrid[x, y] = rect;
-			}
-		}
+	    frameStyle.BorderWidthTop = 2;
+	    frameStyle.BorderWidthLeft = 2;
+	    frameStyle.BorderWidthBottom = 10; 
+	    frameStyle.BorderWidthRight = 10;
+	    frameStyle.BorderColor = frameColor.Darkened(0.3f);
+	   
+	    frameStyle.ShadowColor = new Color(0f, 0f, 0f, 0.4f);
+	    frameStyle.ShadowSize = 12;
+	    frameStyle.ShadowOffset = new Vector2(6, 6);
+
+	    boardFrame.AddThemeStyleboxOverride("panel", frameStyle);
+	    AddChild(boardFrame);
+
+	    // ── 2. IZGARA (KLAVYE PLAKASI VE BOŞLUKLAR) ──
+	    float gap = 6f; 
+	    float actualSize = Step - gap;
+	    _cellActualSize  = actualSize;
+
+	    //Color slotColor = GetColorForBlock(0);
+	    
+	    for (int x = 0; x < 8; x++)
+	    {
+		    for (int y = 0; y < 8; y++)
+		    {
+			    float xPos = GridStartX + x * Step + gap / 2;
+			    float yPos = GridStartY + y * Step + gap / 2;
+
+			    // ── BODY (dış kap, dark alt kısım) ──
+			    Panel body = new Panel();
+			    body.Size     = new Vector2(actualSize, actualSize);
+			    body.Position = new Vector2(xPos, yPos);
+			    AddChild(body);
+			    _bodyGrid[x, y] = body;
+
+			    // ── FACE (body'nin CHILD'i — garantili üstte render) ──
+			    Panel face = new Panel();
+			    face.Size     = new Vector2(actualSize - 4f, actualSize - 9f); // sağ-sol 2px, alt 7px body görünür
+			    face.Position = new Vector2(2f, 2f);                           // body içinde 2px üstten ve soldan
+			    face.Visible  = false;
+			    body.AddChild(face); // ← kritik satır
+			    _visualGrid[x, y] = face;
+		    }
+	    }
+	    SyncVisuals();
 	}
 	
 	private void LoadShapeDatabase()
@@ -385,18 +416,66 @@ public partial class BlockMaster : Node2D
 
 	public void SyncVisuals()
 	{
+		
+		Color slotColor = GetColorForBlock(0);
+		
 		for (int x = 0; x < 8; x++)
-		{
-			for (int y = 0; y < 8; y++)
-			{
-				// Panel'in içindeki tasarımı al
-				StyleBoxFlat style = (StyleBoxFlat)_visualGrid[x, y].GetThemeStylebox("panel");
-			 
-				// Sadece arka plan rengini değiştir, kenarlıklar ve oval köşeler sabit kalsın
-				style.BgColor = GetColorForBlock(_grid[x, y]);
+	    {
+	        for (int y = 0; y < 8; y++)
+	        {
+	            int   cellValue = _grid[x, y];
+	            Color cellColor = GetColorForBlock(cellValue);
+	            Panel body      = _bodyGrid[x, y];
+	            Panel face      = _visualGrid[x, y];
 
-			}
-		}
+	            StyleBoxFlat bodyStyle = new StyleBoxFlat();
+
+	            if (cellValue == 0)
+	            {
+	                // ── BOŞ YUVA: çukur efekti ──────────────────────────────
+	                face.Visible = false;
+
+	                bodyStyle.BgColor                 = slotColor.Darkened(0.05f);
+	                bodyStyle.BorderWidthTop          = 2;
+	                bodyStyle.BorderWidthLeft         = 2;
+	                bodyStyle.BorderWidthBottom       = 0;
+	                bodyStyle.BorderWidthRight        = 0;
+	                bodyStyle.BorderColor             = new Color(0f, 0f, 0f, 0.3f);
+	                bodyStyle.CornerRadiusTopLeft     = 3;
+	                bodyStyle.CornerRadiusTopRight    = 3;
+	                bodyStyle.CornerRadiusBottomLeft  = 3;
+	                bodyStyle.CornerRadiusBottomRight = 3;
+	            }
+	            else
+	            {
+	                // ── DOLU BLOK: 3D keycap ─────────────────────────────────
+	                face.Visible = true;
+
+	                // Body → tuşun görünen koyu alt gövdesi
+	                bodyStyle.BgColor                 = cellColor.Darkened(0.95f);
+	                bodyStyle.CornerRadiusTopLeft     = 4;
+	                bodyStyle.CornerRadiusTopRight    = 4;
+	                bodyStyle.CornerRadiusBottomLeft  = 6;
+	                bodyStyle.CornerRadiusBottomRight = 6;
+
+	                // Face → tuşun üst yüzeyi, body içine gömülü
+	                StyleBoxFlat faceStyle = new StyleBoxFlat();
+	                faceStyle.BgColor                 = cellColor;
+	                faceStyle.BorderWidthTop          = 2;
+	                faceStyle.BorderWidthLeft         = 2;
+	                faceStyle.BorderWidthBottom       = 0;
+	                faceStyle.BorderWidthRight        = 0;
+	                faceStyle.BorderColor             = cellColor.Lightened(0.3f); // üst highlight
+	                faceStyle.CornerRadiusTopLeft     = 3;
+	                faceStyle.CornerRadiusTopRight    = 3;
+	                faceStyle.CornerRadiusBottomLeft  = 3;
+	                faceStyle.CornerRadiusBottomRight = 3;
+	                face.AddThemeStyleboxOverride("panel", faceStyle);
+	            }
+
+	            body.AddThemeStyleboxOverride("panel", bodyStyle);
+	        }
+	    }
 	}
 
 	private Color GetColorForBlock(int cellValue)
@@ -405,12 +484,12 @@ public partial class BlockMaster : Node2D
 		// Tahtadaki (Grid) değere göre doğrudan temanın rengini basıyoruz!
 		return cellValue switch
 		{
-			0 => new Color(0.2f, 0.2f, 0.2f), // Boş tahta hücresi
+			0 => _currentTheme.EmptyGridColor, // Boş tahta hücresi
 			1 => _currentTheme.ComboColor,    // (ComboMaker)
 			2 => _currentTheme.MediumColor,   // (Medium)
 			3 => _currentTheme.SmallColor,    // (Small)
 			4 => _currentTheme.NastyColor,    // (Nasty)
-			_ => new Color(0.2f, 0.2f, 0.2f)  // Güvenlik ağı
+			_ => _currentTheme.EmptyGridColor  // Güvenlik ağı
 		};
 	}
 

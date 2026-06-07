@@ -1,7 +1,14 @@
 using System.Collections.Generic;
 using Godot;
 
-public record ColorPalette(Color ComboColor, Color MediumColor, Color SmallColor, Color NastyColor);
+public record ColorPalette(
+    Color ComboColor, 
+    Color MediumColor, 
+    Color SmallColor, 
+    Color NastyColor,
+    Color BgColor,
+    Color EmptyGridColor
+    );
 
 public enum ShapeCategory
 {
