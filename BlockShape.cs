@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using Godot;
 
+public record ColorPalette(Color ComboColor, Color MediumColor, Color SmallColor, Color NastyColor);
+
 public enum ShapeCategory
 {
     ComboMaker,
@@ -11,6 +13,7 @@ public enum ShapeCategory
 
 public class BlockShape
 {
+    //BlockId artik islevsiz bir ara silinmesi lazim
     public int BlockId { get; private set; } // Sekil rengi
     public int Weight { get; set; }
     public ShapeCategory Category { get; private set; }

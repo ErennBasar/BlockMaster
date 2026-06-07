@@ -7,6 +7,8 @@ public partial class DraggableBlock : Area2D
 	private bool _isDragging = false;
 	public int SlotIndex { get; set; }
 	
+	public Color ActiveThemeColor { get; set; }
+	
 	// Farenin blogun neresinden tuttugunu hesaplamak icin
 	private Vector2 _dragOffset;
 
@@ -62,22 +64,7 @@ public partial class DraggableBlock : Area2D
 		  
 			StyleBoxFlat style = new StyleBoxFlat();
 			
-			// ID'ye göre renk ataması
-			style.BgColor = ShapeData.BlockId switch
-			{
-				1 => new Color(1f, 0.839f, 0.647f), // Acik turuncu
-				2 => new Color(0.91f, 0.612f, 0.506f), // Acik kirmizi
-				3 => new Color(0.82f, 0.384f, 0.361f), // Kirmizi
-				4 => new Color(0.918f, 0.769f, 0.835f), // Acik pembe
-				5 => new Color(0.839f, 0.918f, 0.875f), // Acik yesil
-				6 => new Color(0.722f, 0.878f, 0.831f), // Su yesili
-				7 => new Color(0.584f, 0.722f, 0.82f), // Soluk mavi
-				8 => new Color(0.502f, 0.608f, 0.808f), // Mavi
-				9 => new Color(0.243f, 0.71f, 0.616f), // bmw yesili
-				10 => new Color(0.243f, 0.71f, 0.616f), // bmw yesili
-				11 => new Color(1f, 0.9f, 0f), // Sari
-				_ => new Color(0.8f, 0.2f, 0.2f)  // Varsayılan Kırmızı
-			};
+			style.BgColor = ActiveThemeColor;
 			
 			style.BorderWidthTop = 4;
 			style.BorderWidthBottom = 4;

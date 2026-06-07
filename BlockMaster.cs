@@ -12,6 +12,9 @@ public partial class BlockMaster : Node2D
 	// Renkli kutucuklari tutacak matris
 	private Panel[,] _visualGrid = new Panel[8, 8];
 
+	private List<ColorPalette> _themeDatabase;
+	private ColorPalette _currentTheme;
+
 	private const int CellSize = 120; //Her bir karenin piksel boyutu
 	private const int CellPadding = 5; //Kareler arasi bosluk
 	private const int Step = CellSize + CellPadding;
@@ -46,35 +49,44 @@ public partial class BlockMaster : Node2D
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
+		_themeDatabase = new List<ColorPalette>
+		{
+			// TEMA 1: Klasik Blok Şöleni (Canlı ve Enerjik)
+			new ColorPalette(
+				new Color("#FF3366"), // Combo: Tatlı Kırmızı
+				new Color("#00C4FF"), // Medium: Açık Mavi
+				new Color("#00FF66"), // Small: Fosforlu Yeşil
+				new Color("#8A2BE2") // Nasty: Zehirli Mor
+			),
+			// TEMA 2: Karanlık Siberpunk (Gece modu)
+			new ColorPalette(
+				new Color("#FF007F"), // Combo: Neon Pembe
+				new Color("#00F0FF"), // Medium: Siber Mavi
+				new Color("#FDF900"), // Small: Neon Sarı
+				new Color("#FF3300") // Nasty: Uyarı Kırmızısı
+			),
+			// TEMA 3: Pastel Rüyası (Göz yormayan, chill mood)
+			new ColorPalette(
+				new Color("#FFB5E8"), // Combo: Pastel Pembe
+				new Color("#85E3FF"), // Medium: Bebek Mavisi
+				new Color("#B9FFB0"), // Small: Mint Yeşili
+				new Color("#CBAACB") // Nasty: Pastel Mor
+			)
+		};
+		_currentTheme = _themeDatabase[Random.Shared.Next(_themeDatabase.Count)];
+		
 		InitializeGrid();
 		DrawGridVisuals(); // Calisir calismaz pikselleri erkana basar
 		LoadHighScore();
 		SetupScoreUI();
 		LoadShapeDatabase();
-		SpawnInitialBlocks();
 
 		_dropSound = GetNode<AudioStreamPlayer>("DropSoundPlayer");
 		_clearSound = GetNode<AudioStreamPlayer>("ClearSoundPlayer");
 		_perfectSound = GetNode<AudioStreamPlayer>("PerfectClearSoundPlayer");
 
-		//TestBlockPlacements();
+		SpawnInitialBlocks();
 
-		// DraggableBlock myBlock = GetNodeOrNull<DraggableBlock>("DraggableBlock");
-		//
-		// if (myBlock != null)
-		// {
-		// 	List<Vector2I> lShapeCoords = new List<Vector2I>
-		// 	{
-		// 		new Vector2I(0, 0),
-		// 		new Vector2I(1, 0),
-		// 		new Vector2I(0, -1)
-		// 	};
-		//
-		// 	myBlock.ShapeData = new BlockShape(1, lShapeCoords);
-		// 	
-		// 	// Event baglandi
-		// 	myBlock.OnBlockDropped += HandleBlockDropped;
-		// }
 	}
 
 	private void InitializeGrid()
@@ -131,7 +143,7 @@ public partial class BlockMaster : Node2D
 			int finalX = targetX + offset.X;
 			int finalY = targetY + offset.Y;
 
-			_grid[finalX, finalY] = block.BlockId; 
+			_grid[finalX, finalY] = (int)block.Category + 1;
 		}
 
 		GD.Print($"Blok başarıyla {targetX}, {targetY} merkezine yerleştirildi.");
@@ -387,23 +399,18 @@ public partial class BlockMaster : Node2D
 		}
 	}
 
-	private Color GetColorForBlock(int id)
+	private Color GetColorForBlock(int cellValue)
 	{
-		return id switch
+		
+		// Tahtadaki (Grid) değere göre doğrudan temanın rengini basıyoruz!
+		return cellValue switch
 		{
-			0 => new Color(0.2f, 0.2f, 0.2f), // Boş tahta
-			1 => new Color(1f, 0.839f, 0.647f), // Acik turuncu
-			2 => new Color(0.91f, 0.612f, 0.506f), // Acik kirmizi
-			3 => new Color(0.82f, 0.384f, 0.361f), // Kirmizi
-			4 => new Color(0.918f, 0.769f, 0.835f), // Acik pembe
-			5 => new Color(0.839f, 0.918f, 0.875f), // Acik yesil
-			6 => new Color(0.722f, 0.878f, 0.831f), // Su yesili
-			7 => new Color(0.584f, 0.722f, 0.82f), // Soluk mavi
-			8 => new Color(0.502f, 0.608f, 0.808f), // Mavi
-			9 => new Color(0.243f, 0.71f, 0.616f), // BMW yesili
-			10 => new Color(0.243f, 0.71f, 0.616f), // BMW yesili
-			11 => new Color(1f, 0.9f, 0f), // Sari
-			_ => new Color(0.2f, 0.2f, 0.2f)
+			0 => new Color(0.2f, 0.2f, 0.2f), // Boş tahta hücresi
+			1 => _currentTheme.ComboColor,    // (ComboMaker)
+			2 => _currentTheme.MediumColor,   // (Medium)
+			3 => _currentTheme.SmallColor,    // (Small)
+			4 => _currentTheme.NastyColor,    // (Nasty)
+			_ => new Color(0.2f, 0.2f, 0.2f)  // Güvenlik ağı
 		};
 	}
 
@@ -504,6 +511,15 @@ public partial class BlockMaster : Node2D
 		newBlock.ShapeData = new BlockShape(templateShape.BlockId, templateShape.Weight, templateShape.Category, clonedCoords);
 		newBlock.SlotIndex = slotIndex;
 		
+		newBlock.ActiveThemeColor = templateShape.Category switch
+		{
+			ShapeCategory.ComboMaker => _currentTheme.ComboColor,
+			ShapeCategory.Medium     => _currentTheme.MediumColor,
+			ShapeCategory.Small      => _currentTheme.SmallColor,
+			ShapeCategory.Nasty      => _currentTheme.NastyColor,
+			_                        => new Color(0.8f, 0.2f, 0.2f) // Güvenlik ağı
+		};
+		
 		// Blok doğar doğmaz boyutunu %50 küçültüyoruz ki ekrana sığsın
 		newBlock.Scale = new Vector2(0.5f, 0.5f);
 		
@@ -527,7 +543,16 @@ public partial class BlockMaster : Node2D
 		// Eğer blok o anki yere tam sığıyorsa yeni gölgeleri hesapla ve çiz
 		if (CanPlaceBlock(block.ShapeData, targetIndex.X, targetIndex.Y))
 		{
-			Color shadowColor = GetColorForBlock(block.ShapeData.BlockId);
+			// Gölge rengini ID'den değil, Kategoriden çekiyoruz! ──
+			Color shadowColor = block.ShapeData.Category switch
+			{
+				ShapeCategory.ComboMaker => _currentTheme.ComboColor,
+				ShapeCategory.Medium     => _currentTheme.MediumColor,
+				ShapeCategory.Small      => _currentTheme.SmallColor,
+				ShapeCategory.Nasty      => _currentTheme.NastyColor,
+				_                        => new Color(1f, 1f, 1f) // Güvenlik ağı
+			};
+       
 			shadowColor.A = 0.5f; // Rengi %50 saydam (şeffaf) yapıyoruz ki "Gölge" gibi dursun!
 
 			foreach (Vector2I offset in block.ShapeData.LocalCoordinates)
