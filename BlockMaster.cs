@@ -65,12 +65,60 @@ public partial class BlockMaster : Node2D
 				new Color("#7678ed")
 			),
 			new ColorPalette(
+				new Color("#8C7AE6"), 
+				new Color("#f18701"), 
+				new Color("#3EBB9D"), 
+				new Color("#dda15e"),
+				new Color("#0F141E"),
+				new Color("#1A2130")
+			),
+			new ColorPalette(
+				new Color("#B56576"), 
+				new Color("#4682B4"),
+				new Color("#E56B6F"), 
+				new Color("#D4A373"), 
+				new Color("#EAE6DF"),
+				new Color("#D7D1C7")
+			),
+			new ColorPalette(
+				new Color("#7D5A80"), 
+				new Color("#659DBD"),
+				new Color("#C38D9E"), 
+				new Color("#E27D60"), 
+				new Color("#E2E6E9"),
+				new Color("#D4D9DE")
+			),
+			new ColorPalette(
+				new Color("#5C738B"), 
+				new Color("#C19C70"),
+				new Color("#BA7A70"), 
+				new Color("#798A70"), 
+				new Color("#F0ECE1"),
+				new Color("#E0DCD1")
+			),
+			new ColorPalette(
+				new Color("#8FBC8F"), 
+				new Color("#798A70"), 
+				new Color("#CDE8B5"), 
+				new Color("#2E8B57"),
+				new Color("#121A15"),
+				new Color("#1A261F")
+			),
+			new ColorPalette(
 				new Color("#48cae4"), 
 				new Color("#ef476f"), 
 				new Color("#caf0f8"), 
 				new Color("#ade8f4"),
 				new Color("#33415c"),
 				new Color("#5c677d")
+			),
+			new ColorPalette(
+				new Color("#D92525"), 
+				new Color("#1E88E5"), 
+				new Color("#3EBB9D"), 
+				new Color("#F5A623"),
+				new Color("#1C1E22"),
+				new Color("#25282E")
 			),
 		};
 		_currentTheme = _themeDatabase[Random.Shared.Next(_themeDatabase.Count)];
