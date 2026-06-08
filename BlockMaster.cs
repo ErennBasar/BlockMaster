@@ -73,6 +73,14 @@ public partial class BlockMaster : Node2D
 				new Color("#1A2130")
 			),
 			new ColorPalette(
+				new Color("#8C7AE6"), 
+				new Color("#f18701"), 
+				new Color("#3EBB9D"), 
+				new Color("#dda15e"),
+				new Color("#0F141E"),
+				new Color("#1A2130")
+			),
+			new ColorPalette(
 				new Color("#B56576"), 
 				new Color("#4682B4"),
 				new Color("#E56B6F"), 
