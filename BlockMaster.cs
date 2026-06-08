@@ -10,8 +10,9 @@ public partial class BlockMaster : Node2D
 	private int[,] _grid = new int[8, 8]; 
 	
 	// Renkli kutucuklari tutacak matris
-	private Panel[,] _visualGrid = new Panel[8, 8];
-	private Panel[,] _bodyGrid  = new Panel[8, 8];
+	// private Panel[,] _visualGrid = new Panel[8, 8];
+	// private Panel[,] _bodyGrid  = new Panel[8, 8];
+	private BevelCell[,] _cellGrid = new BevelCell[8, 8];
 	private float _cellActualSize;
 	private const float BodyHeight = 5f;
 
@@ -313,7 +314,7 @@ public partial class BlockMaster : Node2D
 	    boardFrame.Position = new Vector2(GridStartX - padding, GridStartY - padding);
 
 	    StyleBoxFlat frameStyle = new StyleBoxFlat();
-	    Color frameColor = GetColorForBlock(0).Darkened(0.08f); 
+	    Color frameColor = GetColorForBlock(0).Darkened(0.2f); 
 	    frameStyle.BgColor = frameColor;
 	   
 	    frameStyle.CornerRadiusTopLeft = 16;
@@ -348,20 +349,13 @@ public partial class BlockMaster : Node2D
 			    float xPos = GridStartX + x * Step + gap / 2;
 			    float yPos = GridStartY + y * Step + gap / 2;
 
-			    // ── BODY (dış kap, dark alt kısım) ──
-			    Panel body = new Panel();
-			    body.Size     = new Vector2(actualSize, actualSize);
-			    body.Position = new Vector2(xPos, yPos);
-			    AddChild(body);
-			    _bodyGrid[x, y] = body;
+			    BevelCell cell   = new BevelCell();
+			    cell.Size        = new Vector2(actualSize, actualSize);
+			    cell.Position    = new Vector2(xPos, yPos);
+			    cell.MainColor   = GetColorForBlock(0).Lightened(0.15f); // boş yuva rengi
+			    AddChild(cell);
+			    _cellGrid[x, y] = cell;
 
-			    // ── FACE (body'nin CHILD'i — garantili üstte render) ──
-			    Panel face = new Panel();
-			    face.Size     = new Vector2(actualSize - 4f, actualSize - 9f); // sağ-sol 2px, alt 7px body görünür
-			    face.Position = new Vector2(2f, 2f);                           // body içinde 2px üstten ve soldan
-			    face.Visible  = false;
-			    body.AddChild(face); // ← kritik satır
-			    _visualGrid[x, y] = face;
 		    }
 	    }
 	    SyncVisuals();
@@ -417,63 +411,18 @@ public partial class BlockMaster : Node2D
 	public void SyncVisuals()
 	{
 		
-		Color slotColor = GetColorForBlock(0);
+		Color emptyColor = GetColorForBlock(0).Lightened(0.15f);
 		
 		for (int x = 0; x < 8; x++)
 	    {
 	        for (int y = 0; y < 8; y++)
 	        {
-	            int   cellValue = _grid[x, y];
-	            Color cellColor = GetColorForBlock(cellValue);
-	            Panel body      = _bodyGrid[x, y];
-	            Panel face      = _visualGrid[x, y];
+		        int cellValue = _grid[x, y];
 
-	            StyleBoxFlat bodyStyle = new StyleBoxFlat();
-
-	            if (cellValue == 0)
-	            {
-	                // ── BOŞ YUVA: çukur efekti ──────────────────────────────
-	                face.Visible = false;
-
-	                bodyStyle.BgColor                 = slotColor.Darkened(0.05f);
-	                bodyStyle.BorderWidthTop          = 2;
-	                bodyStyle.BorderWidthLeft         = 2;
-	                bodyStyle.BorderWidthBottom       = 0;
-	                bodyStyle.BorderWidthRight        = 0;
-	                bodyStyle.BorderColor             = new Color(0f, 0f, 0f, 0.3f);
-	                bodyStyle.CornerRadiusTopLeft     = 3;
-	                bodyStyle.CornerRadiusTopRight    = 3;
-	                bodyStyle.CornerRadiusBottomLeft  = 3;
-	                bodyStyle.CornerRadiusBottomRight = 3;
-	            }
-	            else
-	            {
-	                // ── DOLU BLOK: 3D keycap ─────────────────────────────────
-	                face.Visible = true;
-
-	                // Body → tuşun görünen koyu alt gövdesi
-	                bodyStyle.BgColor                 = cellColor.Darkened(0.95f);
-	                bodyStyle.CornerRadiusTopLeft     = 4;
-	                bodyStyle.CornerRadiusTopRight    = 4;
-	                bodyStyle.CornerRadiusBottomLeft  = 6;
-	                bodyStyle.CornerRadiusBottomRight = 6;
-
-	                // Face → tuşun üst yüzeyi, body içine gömülü
-	                StyleBoxFlat faceStyle = new StyleBoxFlat();
-	                faceStyle.BgColor                 = cellColor;
-	                faceStyle.BorderWidthTop          = 2;
-	                faceStyle.BorderWidthLeft         = 2;
-	                faceStyle.BorderWidthBottom       = 0;
-	                faceStyle.BorderWidthRight        = 0;
-	                faceStyle.BorderColor             = cellColor.Lightened(0.3f); // üst highlight
-	                faceStyle.CornerRadiusTopLeft     = 3;
-	                faceStyle.CornerRadiusTopRight    = 3;
-	                faceStyle.CornerRadiusBottomLeft  = 3;
-	                faceStyle.CornerRadiusBottomRight = 3;
-	                face.AddThemeStyleboxOverride("panel", faceStyle);
-	            }
-
-	            body.AddThemeStyleboxOverride("panel", bodyStyle);
+		        _cellGrid[x, y].IsEmpty    = cellValue == 0;
+		        _cellGrid[x, y].MainColor  = cellValue == 0
+			        ? emptyColor
+			        : GetColorForBlock(cellValue);
 	        }
 	    }
 	}
@@ -642,7 +591,7 @@ public partial class BlockMaster : Node2D
 				_currentShadowCells.Add(new Vector2I(gridX, gridY));
 
 				// Hücrenin Panel stilini al ve saydam renge boya
-				StyleBoxFlat style = (StyleBoxFlat)_visualGrid[gridX, gridY].GetThemeStylebox("panel");
+				StyleBoxFlat style = (StyleBoxFlat)_cellGrid[gridX, gridY].GetThemeStylebox("panel");
 				style.BgColor = shadowColor;
 			}
 		}
