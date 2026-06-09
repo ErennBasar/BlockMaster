@@ -40,7 +40,7 @@ public partial class BevelCell : Control
         Vector2 sz = Size;
         
         // m (margin) = İçteki küçük karenin dışarıdan ne kadar içeride olacağı (Derinlik miktarı)
-        float m = 16f; 
+        float m = 20f; 
 
         // ── KÖŞE NOKTALARI (DIŞ KARE VE İÇ KARE) ──
         Vector2 pTL = new Vector2(0, 0);         // Dış Sol Üst

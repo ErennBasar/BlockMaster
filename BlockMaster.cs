@@ -47,6 +47,15 @@ public partial class BlockMaster : Node2D
 	private List<DraggableBlock> _activeBlocks = new List<DraggableBlock>();
 	private List<Vector2I> _currentShadowCells = new List<Vector2I>();
 	
+	private List<int> _hoverClearRows = new List<int>();
+	private List<int> _hoverClearCols = new List<int>();
+	private bool _isHovering = false;
+	private Control _highlightOverlay; // Tüm blokların üstüne çizeceğimiz katman
+	private Vector2I _previewGridPos;
+	private List<Vector2I> _previewShapeCoords;
+	private Color _previewColor;
+	private bool _isPreviewValid; // Blok oraya konabiliyor mu?
+	
 	// Sahne Referansı 
 	private PackedScene _blockScene = GD.Load<PackedScene>("res://draggable_block.tscn");
 	
@@ -144,6 +153,15 @@ public partial class BlockMaster : Node2D
 
 		SpawnInitialBlocks();
 
+	}
+	
+	public override void _Process(double delta)
+	{
+		// Ekranda patlayacak bir yer gösteriliyorsa gökkuşağı animasyonu aksın diye her frame overlay'i güncelle!
+		if (_isHovering && (_hoverClearRows.Count > 0 || _hoverClearCols.Count > 0))
+		{
+			_highlightOverlay?.QueueRedraw(); 
+		}
 	}
 
 	private void InitializeGrid()
@@ -415,6 +433,11 @@ public partial class BlockMaster : Node2D
 		    }
 	    }
 	    SyncVisuals();
+	    // DrawGridVisuals() metodunun en altı:
+	    _highlightOverlay = new Control();
+	    _highlightOverlay.ZIndex = 10; // Her şeyin en üstünde parlasın
+	    AddChild(_highlightOverlay);
+	    _highlightOverlay.Draw += DrawHighlights; // Çizim görevini metodumuza bağlıyoruz
 	}
 	
 	private void LoadShapeDatabase()
@@ -524,6 +547,7 @@ public partial class BlockMaster : Node2D
 			_activeBlocks.Remove(block);
 			
 			CheckAndClearlines();
+			ClearHoverHighlight();
 			SyncVisuals();
 			
 			int emptiedSlot = block.SlotIndex;
@@ -620,6 +644,16 @@ public partial class BlockMaster : Node2D
 	private void HandleBlockDragging(DraggableBlock block, Vector2 dragPosition)
 	{
 		Vector2I targetIndex = PixelToGridIndex(dragPosition);
+		
+		float firstCellCenterX = GridStartX + (Step / 2f);
+		float firstCellCenterY = GridStartY + (Step / 2f);
+		
+		int gridx = Mathf.RoundToInt((dragPosition.X - firstCellCenterX) / Step);
+		int gridy = Mathf.RoundToInt((dragPosition.Y - firstCellCenterY) / Step);
+		
+		Vector2I currentGridPos = new Vector2I(gridx, gridy);
+		
+		UpdateHoverHighlight(currentGridPos, block.ShapeData.LocalCoordinates, block.ActiveThemeColor);
 
 		
 		ClearShadows();
@@ -1004,38 +1038,136 @@ public partial class BlockMaster : Node2D
 		GetTree().ReloadCurrentScene();
 	}
 	
-	// private void TestBlockPlacements()
-	// {
-	// 	// 1. Klasik L Şekli (BlockId = 1)
-	// 	List<Vector2I> lShapeCoords = new List<Vector2I>()
-	// 	{
-	// 		new Vector2I(0, 0),
-	// 		new Vector2I(1, 0),
-	// 		new Vector2I(0, -1)
-	// 	};
-	// 	BlockShape lShape = new BlockShape(1, lShapeCoords);
-	// 	
-	// 	// 2. Yatay 3'lü Çubuk (BlockId = 2)
-	// 	List<Vector2I> lineCoords = new List<Vector2I>()
-	// 	{
-	// 		new Vector2I(-1, 0),
-	// 		new Vector2I(0, 0),
-	// 		new Vector2I(1, 0)
-	// 	};
-	// 	BlockShape horizontalLine = new BlockShape(2, lineCoords);
-	//
-	// 	GD.Print("--- 1. L Şekli Testi ---");
-	// 	// Tahtanın ortasına yerleştir
-	// 	PlaceBlock(lShape, 4, 4);
-	// 	
-	// 	GD.Print("--- 2. Çubuk Testi ---");
-	// 	// Çizgiyi tahtanın sağ altına (güvenli bölgeye) yerleştir
-	// 	// Koordinatları 6, 7 olarak ayarladık
-	// 	PlaceBlock(horizontalLine, 6, 7);
-	// 	
-	// 	// Renkleri senkronize et
-	// 	SyncVisuals();
-	// }
+	// Telegraphing
+	public void UpdateHoverHighlight(Vector2I gridTopLeft, List<Vector2I> shapeCoords, Color blockColor)
+	{
+		_previewGridPos = gridTopLeft;
+		_previewShapeCoords = shapeCoords;
+		_previewColor = blockColor;
+		_isHovering = true;
+    
+		// 1. Önce bu pozisyon GEÇERLİ Mİ? (Taşıyor mu veya altı dolu mu diye bakıyoruz)
+		_isPreviewValid = true;
+		foreach (Vector2I offset in shapeCoords)
+		{
+			int x = gridTopLeft.X + offset.X;
+			int y = gridTopLeft.Y + offset.Y;
+        
+			// Sınır dışıysa veya tahtadaki o hücre zaten doluysa geçersizdir!
+			if (x < 0 || x >= 8 || y < 0 || y >= 8 || _grid[x, y] != 0)
+			{
+				_isPreviewValid = false;
+				break;
+			}
+		}
+
+		_hoverClearRows.Clear();
+		_hoverClearCols.Clear();
+
+		// Eğer geçersiz bir yere (dolu bir yere) tutuyorsa patlama hesabı yapma, çık!
+		if (!_isPreviewValid)
+		{
+			_highlightOverlay?.QueueRedraw();
+			return;
+		}
+
+		// 2. GEÇERLİYSE GEÇİCİ TAHTA HESABI (Patlayacakları buluyoruz)
+		int[,] tempGrid = new int[8, 8];
+		Array.Copy(_grid, tempGrid, _grid.Length);
+
+		foreach (Vector2I offset in shapeCoords)
+		{
+			tempGrid[gridTopLeft.X + offset.X, gridTopLeft.Y + offset.Y] = 1; 
+		}
+
+		for (int y = 0; y < 8; y++)
+		{
+			bool isRowFull = true;
+			for (int x = 0; x < 8; x++)
+			{
+				if (tempGrid[x, y] == 0) { isRowFull = false; break; }
+			}
+			if (isRowFull) _hoverClearRows.Add(y);
+		}
+
+		for (int x = 0; x < 8; x++)
+		{
+			bool isColFull = true;
+			for (int y = 0; y < 8; y++)
+			{
+				if (tempGrid[x, y] == 0) { isColFull = false; break; }
+			}
+			if (isColFull) _hoverClearCols.Add(x);
+		}
+
+		_highlightOverlay?.QueueRedraw(); 
+	}
+
+	// Blok tahtanın dışına çıkarsa veya sürükleme bırakılırsa ışıkları kapat
+	public void ClearHoverHighlight()
+	{
+		_isHovering = false;
+		_hoverClearRows.Clear();
+		_hoverClearCols.Clear();
+		_highlightOverlay?.QueueRedraw();
+	}
+	
+	private void DrawHighlights()
+	{
+	    if (!_isHovering || _previewShapeCoords == null) return;
+
+	    float gap = 6f; // Tahtadaki aralıkla birebir aynı olmalı
+	    float actualSize = Step - gap;
+
+	    // ── 1. ÖNCE HAYALET BLOĞU (GHOST PREVIEW) ÇİZ ──
+	    // Geçerliyse kendi renginin %50 saydamı, geçersizse Kırmızı rengin %40 saydamı
+	    Color ghostColor = _isPreviewValid 
+	        ? new Color(_previewColor.R, _previewColor.G, _previewColor.B, 0.5f) 
+	        : new Color(1f, 0f, 0f, 0.4f); 
+
+	    foreach (Vector2I offset in _previewShapeCoords)
+	    {
+	        int gx = _previewGridPos.X + offset.X;
+	        int gy = _previewGridPos.Y + offset.Y;
+
+	        // Grid sınırları içindeyse ekrana çiz
+	        if (gx >= 0 && gx < 8 && gy >= 0 && gy < 8)
+	        {
+	            float px = GridStartX + (gx * Step) + (gap / 2f);
+	            float py = GridStartY + (gy * Step) + (gap / 2f);
+	            
+	            Rect2 rect = new Rect2(px, py, actualSize, actualSize);
+	            
+	            // Bloğun cam gibi saydam iç dolgusunu çiziyoruz
+	            _highlightOverlay.DrawRect(rect, ghostColor, true);
+	            
+	            // Bloğa şık, ince, parlak bir çerçeve atıyoruz ki 3D oyun alanında belli olsun
+	            _highlightOverlay.DrawRect(rect, new Color(1, 1, 1, 0.3f), false, 2f);
+	        }
+	    }
+
+	    // Eğer geçersiz yere konuyorsa veya patlayacak satır yoksa gökkuşağı çizmeden çık
+	    if (!_isPreviewValid || (_hoverClearRows.Count == 0 && _hoverClearCols.Count == 0)) return;
+
+	    // ── 2. PATLAYACAK YERLERİN GÖKKUŞAĞI NEON ÇİZİMİ ──
+	    float time = (float)Time.GetTicksMsec() / 1000f;
+	    Color rainbowColor = Color.FromHsv((time * 2.0f) % 1f, 0.85f, 1f, 0.8f);
+	    float padding = 4f;
+
+	    foreach (int y in _hoverClearRows)
+	    {
+	        Rect2 rect = new Rect2(GridStartX - padding, GridStartY + (y * Step) - padding, (8 * Step) + (padding * 2), Step + (padding * 2));
+	        _highlightOverlay.DrawRect(rect, rainbowColor, false, 4f);
+	        _highlightOverlay.DrawRect(rect, new Color(rainbowColor.R, rainbowColor.G, rainbowColor.B, 0.15f), true);
+	    }
+
+	    foreach (int x in _hoverClearCols)
+	    {
+	        Rect2 rect = new Rect2(GridStartX + (x * Step) - padding, GridStartY - padding, Step + (padding * 2), (8 * Step) + (padding * 2));
+	        _highlightOverlay.DrawRect(rect, rainbowColor, false, 4f);
+	        _highlightOverlay.DrawRect(rect, new Color(rainbowColor.R, rainbowColor.G, rainbowColor.B, 0.15f), true);
+	    }
+	}	
 	
 	
 }
