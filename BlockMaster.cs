@@ -703,7 +703,7 @@ public partial class BlockMaster : Node2D
 
 		if (_scoreLabel != null)
 		{
-			_scoreLabel.Text = $"PUAN: {_score}";
+			_scoreLabel.Text = _score.ToString();
 		}
 
 		if (_score > _highScore)
@@ -718,22 +718,83 @@ public partial class BlockMaster : Node2D
 	}
 
 	private void SetupScoreUI()
+{
+    // ── 1. EKRANIN SOL ÜST KÖŞESİ (REKOR VE SEMBOL) ──
+    _highScoreLabel = new Label();
+    // Ekrana tam yapışmasın, sol üstten 30 piksel boşluk bıraksın
+    _highScoreLabel.Position = new Vector2(30, 30);
+    
+    // Başına kral tacı veya kupa emojisi ekliyoruz. (Godot'un varsayılan fontu emojileri okur)
+    _highScoreLabel.Text = $"🏆{_highScore}";
+    _highScoreLabel.AddThemeFontSizeOverride("font_size", 54);
+    _highScoreLabel.AddThemeColorOverride("font_color", new Color("#FFD700"));
+    _highScoreLabel.AddThemeConstantOverride("outline_size", 6);
+    _highScoreLabel.AddThemeColorOverride("font_outline_color", new Color(0, 0, 0, 0.8f));
+    _highScoreLabel.AddThemeConstantOverride("shadow_offset_y", 3);
+    AddChild(_highScoreLabel);
+
+
+    // ── 2. OYUN ALANININ BİRAZCIK ÜSTÜ, TAM ORTASI (ANLIK PUAN) ──
+    _scoreLabel = new Label();
+    
+    // Yazıyı kendi içinde tam ortaya hizala
+    _scoreLabel.HorizontalAlignment = HorizontalAlignment.Center;
+    _scoreLabel.VerticalAlignment = VerticalAlignment.Center;
+    
+    // İŞTE SIR BURADA: Label'ın genişliğini tam olarak "8x8 Oyun Tahtası" kadar yapıyoruz.
+    // Böylece X pozisyonunu tahtayla aynı başlattığımızda, yazı otomatik olarak tahtanın tam ortasına jilet gibi hizalanır!
+    float gridTotalWidth = 8 * Step;
+    _scoreLabel.Size = new Vector2(gridTotalWidth, 60); 
+    
+    // Tahtanın başlangıcından (GridStartY) 80 piksel yukarıya koyuyoruz
+    _scoreLabel.Position = new Vector2(GridStartX, GridStartY - 120); 
+    
+    // Puanı sadece sayı olarak büyükçe yazdırırsan çok daha klas ve modern durur
+    _scoreLabel.Text = "0"; 
+    _scoreLabel.AddThemeFontSizeOverride("font_size", 64); // Puan kocaman ve heybetli olsun
+    _scoreLabel.AddThemeColorOverride("font_color", new Color("#ffffff")); // Bembeyaz patlasın
+    _scoreLabel.AddThemeConstantOverride("outline_size", 4);
+    _scoreLabel.AddThemeColorOverride("font_shadow_color", new Color(0, 0, 0, 0.5f));
+    AddChild(_scoreLabel);
+}
+	
+	private void DecorateScoreLabel(Label label, bool isHighScore)
 	{
-		// Puan
-		_scoreLabel = new Label();
-		_scoreLabel.Position = new Vector2(GridStartX, GridStartY - 100);
-		_scoreLabel.Text = "PUAN: 0";
-		_scoreLabel.AddThemeFontSizeOverride("font_size", 40);
-		_scoreLabel.AddThemeColorOverride("font_color",new Color(0.9f, 0.9f, 0.8f));
-		AddChild(_scoreLabel);
-		
-		// Rekor
-		_highScoreLabel = new Label();
-		_highScoreLabel.Position = new Vector2(GridStartX, GridStartY - 50);
-		_highScoreLabel.Text = $"REKOR: {_highScore}";
-		_highScoreLabel.AddThemeFontSizeOverride("font_size", 28);
-		_highScoreLabel.AddThemeColorOverride("font_color", new Color(0.9f, 0.7f, 0.2f));
-		AddChild(_highScoreLabel);
+		StyleBoxFlat style = new StyleBoxFlat();
+    
+		// 1. Kasa Rengi: Askeri / Hacker temanın o neredeyse siyah arka planı
+		style.BgColor = new Color("#0A120D"); 
+    
+		// Köşe kavisleri (Fiziksel, tok bir tuş/kasa hissiyatı)
+		style.CornerRadiusTopLeft = 6;
+		style.CornerRadiusTopRight = 6;
+		style.CornerRadiusBottomLeft = 6;
+		style.CornerRadiusBottomRight = 6;
+
+		// 2. 3D Ağırlık Efekti (Sadece alt tarafı kalın kasa)
+		style.BorderWidthTop = 0;
+		style.BorderWidthLeft = 0;
+		style.BorderWidthBottom = 4;
+		style.BorderWidthRight = 0;
+		style.BorderColor = new Color("#050806"); // Kasanın en altındaki zifiri karanlık gölge
+
+		// 3. İç Boşluk (Yazı kasanın duvarlarına yapışmasın diye nefes aldırıyoruz)
+		style.ContentMarginLeft = 16;
+		style.ContentMarginRight = 16;
+		style.ContentMarginTop = 8;
+		style.ContentMarginBottom = 8;
+
+		// Stili Label'ın beynine zorla çakıyoruz!
+		label.AddThemeStyleboxOverride("normal", style);
+
+		// 4. LED YAZI RENKLERİ (O hardcore yeşil palete uygun olarak)
+		// Rekor yazısı bizim "Nasty" rengimizle (Açık Çay Yeşili) fosforlu yansın, diğeri tok yeşil olsun.
+		Color textColor = isHighScore ? new Color("#CDE8B5") : new Color("#8FBC8F"); 
+		label.AddThemeColorOverride("font_color", textColor);
+    
+		// Yazının arkasına LCD ekran gölgesi atıyoruz ki düz metin gibi durmasın
+		label.AddThemeColorOverride("font_shadow_color", new Color(0f, 0f, 0f, 0.8f));
+		label.AddThemeConstantOverride("shadow_offset_y", 2);
 	}
 
 	private void LoadHighScore()
