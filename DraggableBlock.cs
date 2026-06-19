@@ -54,32 +54,32 @@ public partial class DraggableBlock : Area2D
 		foreach (Node child in GetChildren())
 			child.QueueFree();
 
-	    if (_shapeData == null) return;
-	    
-	    float gap = 6f; 
-	    float actualSize = CellSize - gap;
+		if (_shapeData == null) return;
+		
+		float gap = 6f; 
+		float actualSize = CellSize - gap;
 
-	    foreach (Vector2I offset in _shapeData.LocalCoordinates)
-	    {
-	        float posX = (offset.X * Step) - (CellSize / 2f);
-	        float posY = (offset.Y * Step) - (CellSize / 2f);
-	        
-	        BevelCell cell    = new BevelCell();
-	        cell.MainColor    = ActiveThemeColor;
-	        cell.IsEmpty     = false;
-	        cell.Size         = new Vector2(actualSize, actualSize);
-	        cell.Position     = new Vector2(posX + (gap / 2f), posY + (gap / 2f));
-	        cell.MouseFilter  = Control.MouseFilterEnum.Ignore;
-	        AddChild(cell);
+		foreach (Vector2I offset in _shapeData.LocalCoordinates)
+		{
+			float posX = (offset.X * Step) - (CellSize / 2f);
+			float posY = (offset.Y * Step) - (CellSize / 2f);
+			
+			BevelCell cell    = new BevelCell();
+			cell.MainColor    = ActiveThemeColor;
+			cell.IsEmpty     = false;
+			cell.Size         = new Vector2(actualSize, actualSize);
+			cell.Position     = new Vector2(posX + (gap / 2f), posY + (gap / 2f));
+			cell.MouseFilter  = Control.MouseFilterEnum.Ignore;
+			AddChild(cell);
 
-	        // Çarpışma alanı (değişmedi)
-	        CollisionShape2D col   = new CollisionShape2D();
-	        RectangleShape2D shape = new RectangleShape2D();
-	        shape.Size             = new Vector2(CellSize, CellSize);
-	        col.Shape              = shape;
-	        col.Position           = new Vector2(posX + CellSize / 2f, posY + CellSize / 2f);
-	        AddChild(col);
-	    }
+			// Çarpışma alanı (değişmedi)
+			CollisionShape2D col   = new CollisionShape2D();
+			RectangleShape2D shape = new RectangleShape2D();
+			shape.Size             = new Vector2(CellSize, CellSize);
+			col.Shape              = shape;
+			col.Position           = new Vector2(posX + CellSize / 2f, posY + CellSize / 2f);
+			AddChild(col);
+		}
 	}
 	
 	// Area2D'nin icinde gomulu olan fiziksel tiklama algilayici
@@ -117,7 +117,7 @@ public partial class DraggableBlock : Area2D
 		{
 			_isDragging = false;
 			ZIndex = 0;
-        
+		
 			// Bloğu tahtaya bırakmayı dene
 			OnBlockDropped?.Invoke(this, GlobalPosition);
 		}

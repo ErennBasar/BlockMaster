@@ -382,62 +382,62 @@ public partial class BlockMaster : Node2D
 	{
 		
 		// ── 1. ANA OYUN TAHTASI ÇERÇEVESİ (KASA/BOARD FRAME) ──
-	    float padding = 12f; 
-	    Panel boardFrame = new Panel();
-	    boardFrame.Size = new Vector2((8 * Step) + (padding * 2), (8 * Step) + (padding * 2));
-	    boardFrame.Position = new Vector2(GridStartX - padding, GridStartY - padding);
+		float padding = 12f; 
+		Panel boardFrame = new Panel();
+		boardFrame.Size = new Vector2((8 * Step) + (padding * 2), (8 * Step) + (padding * 2));
+		boardFrame.Position = new Vector2(GridStartX - padding, GridStartY - padding);
 
-	    StyleBoxFlat frameStyle = new StyleBoxFlat();
-	    Color frameColor = GetColorForBlock(0).Darkened(0.2f); 
-	    frameStyle.BgColor = frameColor;
+		StyleBoxFlat frameStyle = new StyleBoxFlat();
+		Color frameColor = GetColorForBlock(0).Darkened(0.2f); 
+		frameStyle.BgColor = frameColor;
 	   
-	    frameStyle.CornerRadiusTopLeft = 16;
-	    frameStyle.CornerRadiusTopRight = 16;
-	    frameStyle.CornerRadiusBottomLeft = 16;
-	    frameStyle.CornerRadiusBottomRight = 16;
+		frameStyle.CornerRadiusTopLeft = 16;
+		frameStyle.CornerRadiusTopRight = 16;
+		frameStyle.CornerRadiusBottomLeft = 16;
+		frameStyle.CornerRadiusBottomRight = 16;
 
-	    frameStyle.BorderWidthTop = 2;
-	    frameStyle.BorderWidthLeft = 2;
-	    frameStyle.BorderWidthBottom = 10; 
-	    frameStyle.BorderWidthRight = 10;
-	    frameStyle.BorderColor = frameColor.Darkened(0.3f);
+		frameStyle.BorderWidthTop = 2;
+		frameStyle.BorderWidthLeft = 2;
+		frameStyle.BorderWidthBottom = 10; 
+		frameStyle.BorderWidthRight = 10;
+		frameStyle.BorderColor = frameColor.Darkened(0.3f);
 	   
-	    frameStyle.ShadowColor = new Color(0f, 0f, 0f, 0.4f);
-	    frameStyle.ShadowSize = 12;
-	    frameStyle.ShadowOffset = new Vector2(6, 6);
+		frameStyle.ShadowColor = new Color(0f, 0f, 0f, 0.4f);
+		frameStyle.ShadowSize = 12;
+		frameStyle.ShadowOffset = new Vector2(6, 6);
 
-	    boardFrame.AddThemeStyleboxOverride("panel", frameStyle);
-	    AddChild(boardFrame);
+		boardFrame.AddThemeStyleboxOverride("panel", frameStyle);
+		AddChild(boardFrame);
 
-	    // ── 2. IZGARA (KLAVYE PLAKASI VE BOŞLUKLAR) ──
-	    float gap = 6f; 
-	    float actualSize = Step - gap;
-	    _cellActualSize  = actualSize;
+		// ── 2. IZGARA (KLAVYE PLAKASI VE BOŞLUKLAR) ──
+		float gap = 6f; 
+		float actualSize = Step - gap;
+		_cellActualSize  = actualSize;
 
-	    //Color slotColor = GetColorForBlock(0);
-	    
-	    for (int x = 0; x < 8; x++)
-	    {
-		    for (int y = 0; y < 8; y++)
-		    {
-			    float xPos = GridStartX + x * Step + gap / 2;
-			    float yPos = GridStartY + y * Step + gap / 2;
+		//Color slotColor = GetColorForBlock(0);
+		
+		for (int x = 0; x < 8; x++)
+		{
+			for (int y = 0; y < 8; y++)
+			{
+				float xPos = GridStartX + x * Step + gap / 2;
+				float yPos = GridStartY + y * Step + gap / 2;
 
-			    BevelCell cell   = new BevelCell();
-			    cell.Size        = new Vector2(actualSize, actualSize);
-			    cell.Position    = new Vector2(xPos, yPos);
-			    cell.MainColor   = GetColorForBlock(0).Lightened(0.15f); // boş yuva rengi
-			    AddChild(cell);
-			    _cellGrid[x, y] = cell;
+				BevelCell cell   = new BevelCell();
+				cell.Size        = new Vector2(actualSize, actualSize);
+				cell.Position    = new Vector2(xPos, yPos);
+				cell.MainColor   = GetColorForBlock(0).Lightened(0.15f); // boş yuva rengi
+				AddChild(cell);
+				_cellGrid[x, y] = cell;
 
-		    }
-	    }
-	    SyncVisuals();
-	    // DrawGridVisuals() metodunun en altı:
-	    _highlightOverlay = new Control();
-	    _highlightOverlay.ZIndex = 10; // Her şeyin en üstünde parlasın
-	    AddChild(_highlightOverlay);
-	    _highlightOverlay.Draw += DrawHighlights; // Çizim görevini metodumuza bağlıyoruz
+			}
+		}
+		SyncVisuals();
+		// DrawGridVisuals() metodunun en altı:
+		_highlightOverlay = new Control();
+		_highlightOverlay.ZIndex = 10; // Her şeyin en üstünde parlasın
+		AddChild(_highlightOverlay);
+		_highlightOverlay.Draw += DrawHighlights; // Çizim görevini metodumuza bağlıyoruz
 	}
 	
 	private void LoadShapeDatabase()
@@ -493,17 +493,17 @@ public partial class BlockMaster : Node2D
 		Color emptyColor = GetColorForBlock(0).Lightened(0.15f);
 		
 		for (int x = 0; x < 8; x++)
-	    {
-	        for (int y = 0; y < 8; y++)
-	        {
-		        int cellValue = _grid[x, y];
+		{
+			for (int y = 0; y < 8; y++)
+			{
+				int cellValue = _grid[x, y];
 
-		        _cellGrid[x, y].IsEmpty    = cellValue == 0;
-		        _cellGrid[x, y].MainColor  = cellValue == 0
-			        ? emptyColor
-			        : GetColorForBlock(cellValue);
-	        }
-	    }
+				_cellGrid[x, y].IsEmpty    = cellValue == 0;
+				_cellGrid[x, y].MainColor  = cellValue == 0
+					? emptyColor
+					: GetColorForBlock(cellValue);
+			}
+		}
 	}
 
 	private Color GetColorForBlock(int cellValue)
@@ -670,7 +670,7 @@ public partial class BlockMaster : Node2D
 				ShapeCategory.Nasty      => _currentTheme.NastyColor,
 				_                        => new Color(1f, 1f, 1f) // Güvenlik ağı
 			};
-       
+	   
 			shadowColor.A = 0.5f; // Rengi %50 saydam (şeffaf) yapıyoruz ki "Gölge" gibi dursun!
 
 			foreach (Vector2I offset in block.ShapeData.LocalCoordinates)
@@ -719,52 +719,52 @@ public partial class BlockMaster : Node2D
 
 	private void SetupScoreUI()
 {
-    // ── 1. EKRANIN SOL ÜST KÖŞESİ (REKOR VE SEMBOL) ──
-    _highScoreLabel = new Label();
-    // Ekrana tam yapışmasın, sol üstten 30 piksel boşluk bıraksın
-    _highScoreLabel.Position = new Vector2(30, 30);
-    
-    // Başına kral tacı veya kupa emojisi ekliyoruz. (Godot'un varsayılan fontu emojileri okur)
-    _highScoreLabel.Text = $"🏆{_highScore}";
-    _highScoreLabel.AddThemeFontSizeOverride("font_size", 54);
-    _highScoreLabel.AddThemeColorOverride("font_color", new Color("#FFD700"));
-    _highScoreLabel.AddThemeConstantOverride("outline_size", 6);
-    _highScoreLabel.AddThemeColorOverride("font_outline_color", new Color(0, 0, 0, 0.8f));
-    _highScoreLabel.AddThemeConstantOverride("shadow_offset_y", 3);
-    AddChild(_highScoreLabel);
+	// ── 1. EKRANIN SOL ÜST KÖŞESİ (REKOR VE SEMBOL) ──
+	_highScoreLabel = new Label();
+	// Ekrana tam yapışmasın, sol üstten 30 piksel boşluk bıraksın
+	_highScoreLabel.Position = new Vector2(30, 30);
+	
+	// Başına kral tacı veya kupa emojisi ekliyoruz. (Godot'un varsayılan fontu emojileri okur)
+	_highScoreLabel.Text = $"🏆{_highScore}";
+	_highScoreLabel.AddThemeFontSizeOverride("font_size", 54);
+	_highScoreLabel.AddThemeColorOverride("font_color", new Color("#FFD700"));
+	_highScoreLabel.AddThemeConstantOverride("outline_size", 6);
+	_highScoreLabel.AddThemeColorOverride("font_outline_color", new Color(0, 0, 0, 0.8f));
+	_highScoreLabel.AddThemeConstantOverride("shadow_offset_y", 3);
+	AddChild(_highScoreLabel);
 
 
-    // ── 2. OYUN ALANININ BİRAZCIK ÜSTÜ, TAM ORTASI (ANLIK PUAN) ──
-    _scoreLabel = new Label();
-    
-    // Yazıyı kendi içinde tam ortaya hizala
-    _scoreLabel.HorizontalAlignment = HorizontalAlignment.Center;
-    _scoreLabel.VerticalAlignment = VerticalAlignment.Center;
-    
-    // İŞTE SIR BURADA: Label'ın genişliğini tam olarak "8x8 Oyun Tahtası" kadar yapıyoruz.
-    // Böylece X pozisyonunu tahtayla aynı başlattığımızda, yazı otomatik olarak tahtanın tam ortasına jilet gibi hizalanır!
-    float gridTotalWidth = 8 * Step;
-    _scoreLabel.Size = new Vector2(gridTotalWidth, 60); 
-    
-    // Tahtanın başlangıcından (GridStartY) 80 piksel yukarıya koyuyoruz
-    _scoreLabel.Position = new Vector2(GridStartX, GridStartY - 120); 
-    
-    // Puanı sadece sayı olarak büyükçe yazdırırsan çok daha klas ve modern durur
-    _scoreLabel.Text = "0"; 
-    _scoreLabel.AddThemeFontSizeOverride("font_size", 64); // Puan kocaman ve heybetli olsun
-    _scoreLabel.AddThemeColorOverride("font_color", new Color("#ffffff")); // Bembeyaz patlasın
-    _scoreLabel.AddThemeConstantOverride("outline_size", 4);
-    _scoreLabel.AddThemeColorOverride("font_shadow_color", new Color(0, 0, 0, 0.5f));
-    AddChild(_scoreLabel);
+	// ── 2. OYUN ALANININ BİRAZCIK ÜSTÜ, TAM ORTASI (ANLIK PUAN) ──
+	_scoreLabel = new Label();
+	
+	// Yazıyı kendi içinde tam ortaya hizala
+	_scoreLabel.HorizontalAlignment = HorizontalAlignment.Center;
+	_scoreLabel.VerticalAlignment = VerticalAlignment.Center;
+	
+	// İŞTE SIR BURADA: Label'ın genişliğini tam olarak "8x8 Oyun Tahtası" kadar yapıyoruz.
+	// Böylece X pozisyonunu tahtayla aynı başlattığımızda, yazı otomatik olarak tahtanın tam ortasına jilet gibi hizalanır!
+	float gridTotalWidth = 8 * Step;
+	_scoreLabel.Size = new Vector2(gridTotalWidth, 60); 
+	
+	// Tahtanın başlangıcından (GridStartY) 80 piksel yukarıya koyuyoruz
+	_scoreLabel.Position = new Vector2(GridStartX, GridStartY - 120); 
+	
+	// Puanı sadece sayı olarak büyükçe yazdırırsan çok daha klas ve modern durur
+	_scoreLabel.Text = "0"; 
+	_scoreLabel.AddThemeFontSizeOverride("font_size", 64); // Puan kocaman ve heybetli olsun
+	_scoreLabel.AddThemeColorOverride("font_color", new Color("#ffffff")); // Bembeyaz patlasın
+	_scoreLabel.AddThemeConstantOverride("outline_size", 4);
+	_scoreLabel.AddThemeColorOverride("font_shadow_color", new Color(0, 0, 0, 0.5f));
+	AddChild(_scoreLabel);
 }
 	
 	private void DecorateScoreLabel(Label label, bool isHighScore)
 	{
 		StyleBoxFlat style = new StyleBoxFlat();
-    
+	
 		// 1. Kasa Rengi: Askeri / Hacker temanın o neredeyse siyah arka planı
 		style.BgColor = new Color("#0A120D"); 
-    
+	
 		// Köşe kavisleri (Fiziksel, tok bir tuş/kasa hissiyatı)
 		style.CornerRadiusTopLeft = 6;
 		style.CornerRadiusTopRight = 6;
@@ -791,7 +791,7 @@ public partial class BlockMaster : Node2D
 		// Rekor yazısı bizim "Nasty" rengimizle (Açık Çay Yeşili) fosforlu yansın, diğeri tok yeşil olsun.
 		Color textColor = isHighScore ? new Color("#CDE8B5") : new Color("#8FBC8F"); 
 		label.AddThemeColorOverride("font_color", textColor);
-    
+	
 		// Yazının arkasına LCD ekran gölgesi atıyoruz ki düz metin gibi durmasın
 		label.AddThemeColorOverride("font_shadow_color", new Color(0f, 0f, 0f, 0.8f));
 		label.AddThemeConstantOverride("shadow_offset_y", 2);
@@ -871,72 +871,72 @@ public partial class BlockMaster : Node2D
 		Dictionary<BlockShape, int> dynamicWeights = new();
 
 		foreach (BlockShape shape in _shapeDatabase)
-	    {
-	        int currentWeight = shape.Weight;
+		{
+			int currentWeight = shape.Weight;
 
-	        if (fullness < 0.25f)
-	        {
-	            // ── OYUN BAŞI: Kombo yağmuru ────────────────────────
-	            currentWeight = shape.Category switch
-	            {
-	                ShapeCategory.ComboMaker => currentWeight * 3,   // Büyükleri 3 kat artır
-	                ShapeCategory.Medium => currentWeight / 2,   // Ortaları yarıya indir
-	                ShapeCategory.Small => 0,                   // Mini şekil yok
-	                ShapeCategory.Nasty => 0,                   // Pis şekil yok
-	                _ => currentWeight
-	            };
-	        }
-	        else if (fullness <= 0.65f)
-	        {
-	            // ── ORTA OYUN: Dengeli ──────────────────────────────
-	            currentWeight = shape.Category switch
-	            {
-	                ShapeCategory.ComboMaker => currentWeight,
-	                ShapeCategory.Medium => (int)(currentWeight * 1.3f),
-	                ShapeCategory.Small => currentWeight,
-	                ShapeCategory.Nasty => currentWeight / 3,   // Pisleri bastır
-	                _ => currentWeight
-	            };
-	        }
-	        else
-	        {
-	            // ── TAHTA DOLU: Hayat kurtar ─────────────────────────
-	            int cellCount = shape.LocalCoordinates.Count;
-	            currentWeight = shape.Category switch
-	            {
-	                ShapeCategory.ComboMaker => cellCount >= 6 ? 1 : currentWeight / 3,
-	                ShapeCategory.Medium => (int)(currentWeight * 1.5f),
-	                ShapeCategory.Small => currentWeight * 5,   // Küçükleri şelale gibi akıt
-	                ShapeCategory.Nasty => 0,                   // Doluyken pis şekil = game over
-	                _ => currentWeight
-	            };
-	        }
+			if (fullness < 0.25f)
+			{
+				// ── OYUN BAŞI: Kombo yağmuru ────────────────────────
+				currentWeight = shape.Category switch
+				{
+					ShapeCategory.ComboMaker => currentWeight * 3,   // Büyükleri 3 kat artır
+					ShapeCategory.Medium => currentWeight / 2,   // Ortaları yarıya indir
+					ShapeCategory.Small => 0,                   // Mini şekil yok
+					ShapeCategory.Nasty => 0,                   // Pis şekil yok
+					_ => currentWeight
+				};
+			}
+			else if (fullness <= 0.65f)
+			{
+				// ── ORTA OYUN: Dengeli ──────────────────────────────
+				currentWeight = shape.Category switch
+				{
+					ShapeCategory.ComboMaker => currentWeight,
+					ShapeCategory.Medium => (int)(currentWeight * 1.3f),
+					ShapeCategory.Small => currentWeight,
+					ShapeCategory.Nasty => currentWeight / 3,   // Pisleri bastır
+					_ => currentWeight
+				};
+			}
+			else
+			{
+				// ── TAHTA DOLU: Hayat kurtar ─────────────────────────
+				int cellCount = shape.LocalCoordinates.Count;
+				currentWeight = shape.Category switch
+				{
+					ShapeCategory.ComboMaker => cellCount >= 6 ? 1 : currentWeight / 3,
+					ShapeCategory.Medium => (int)(currentWeight * 1.5f),
+					ShapeCategory.Small => currentWeight * 5,   // Küçükleri şelale gibi akıt
+					ShapeCategory.Nasty => 0,                   // Doluyken pis şekil = game over
+					_ => currentWeight
+				};
+			}
 
-	        if (currentWeight > 0)
-	        {
-	            dynamicWeights[shape] = currentWeight;
-	            totalDynamicWeight += currentWeight;
-	        }
-	    }
+			if (currentWeight > 0)
+			{
+				dynamicWeights[shape] = currentWeight;
+				totalDynamicWeight += currentWeight;
+			}
+		}
 
 		if (totalDynamicWeight == 0) return _shapeDatabase[0];
 
 		int randomValue = Random.Shared.Next(0, totalDynamicWeight);
 		int cumulativeWeight = 0;
 		BlockShape selected = _shapeDatabase[0];
-    
+	
 		foreach (var kvp in dynamicWeights)
-	    {
-	        cumulativeWeight += kvp.Value;
-	        if (randomValue < cumulativeWeight)
-	        {
-		        selected = kvp.Key; // Şekli bulduk, kaydettik
-		        break; 
-	        }
-	    }
+		{
+			cumulativeWeight += kvp.Value;
+			if (randomValue < cumulativeWeight)
+			{
+				selected = kvp.Key; // Şekli bulduk, kaydettik
+				break; 
+			}
+		}
 
 		bool isHard = selected.Category == ShapeCategory.Nasty ||
-		              selected.LocalCoordinates.Count >= 6;
+					  selected.LocalCoordinates.Count >= 6;
 		_consecutiveHardShapes = isHard ? _consecutiveHardShapes + 1 : 0;
 
 		return selected;
@@ -979,7 +979,7 @@ public partial class BlockMaster : Node2D
 	{
 		Label floatingLabel = new Label();
 		floatingLabel.Text = text;
-        
+		
 		// Yazı için Jilet gibi bir tasarım (Style) ayarı
 		LabelSettings settings = new LabelSettings();
 		settings.FontSize = (int)(32 * scale); // Font boyutunu kombo büyüklüğüne göre büyüt!
@@ -1004,7 +1004,7 @@ public partial class BlockMaster : Node2D
 		// 1 saniye içinde 120 piksel yukarı süzül
 		tween.TweenProperty(floatingLabel, "position", floatingLabel.Position + new Vector2(0, -120), 1.0f)
 			.SetTrans(Tween.TransitionType.Cubic).SetEase(Tween.EaseType.Out);
-        
+		
 		// 1 saniye içinde yavaşça saydamlaşarak (Alpha = 0) kaybol
 		tween.TweenProperty(floatingLabel, "modulate:a", 0.0f, 1.0f)
 			.SetTrans(Tween.TransitionType.Cubic).SetEase(Tween.EaseType.In);
@@ -1106,14 +1106,14 @@ public partial class BlockMaster : Node2D
 		_previewShapeCoords = shapeCoords;
 		_previewColor = blockColor;
 		_isHovering = true;
-    
+	
 		// 1. Önce bu pozisyon GEÇERLİ Mİ? (Taşıyor mu veya altı dolu mu diye bakıyoruz)
 		_isPreviewValid = true;
 		foreach (Vector2I offset in shapeCoords)
 		{
 			int x = gridTopLeft.X + offset.X;
 			int y = gridTopLeft.Y + offset.Y;
-        
+		
 			// Sınır dışıysa veya tahtadaki o hücre zaten doluysa geçersizdir!
 			if (x < 0 || x >= 8 || y < 0 || y >= 8 || _grid[x, y] != 0)
 			{
@@ -1175,59 +1175,59 @@ public partial class BlockMaster : Node2D
 	
 	private void DrawHighlights()
 	{
-	    if (!_isHovering || _previewShapeCoords == null) return;
+		if (!_isHovering || _previewShapeCoords == null) return;
 
-	    float gap = 6f; // Tahtadaki aralıkla birebir aynı olmalı
-	    float actualSize = Step - gap;
+		float gap = 6f; // Tahtadaki aralıkla birebir aynı olmalı
+		float actualSize = Step - gap;
 
-	    // ── 1. ÖNCE HAYALET BLOĞU (GHOST PREVIEW) ÇİZ ──
-	    // Geçerliyse kendi renginin %50 saydamı, geçersizse Kırmızı rengin %40 saydamı
-	    Color ghostColor = _isPreviewValid 
-	        ? new Color(_previewColor.R, _previewColor.G, _previewColor.B, 0.5f) 
-	        : new Color(1f, 0f, 0f, 0.4f); 
+		// ── 1. ÖNCE HAYALET BLOĞU (GHOST PREVIEW) ÇİZ ──
+		// Geçerliyse kendi renginin %50 saydamı, geçersizse Kırmızı rengin %40 saydamı
+		Color ghostColor = _isPreviewValid 
+			? new Color(_previewColor.R, _previewColor.G, _previewColor.B, 0.5f) 
+			: new Color(1f, 0f, 0f, 0.4f); 
 
-	    foreach (Vector2I offset in _previewShapeCoords)
-	    {
-	        int gx = _previewGridPos.X + offset.X;
-	        int gy = _previewGridPos.Y + offset.Y;
+		foreach (Vector2I offset in _previewShapeCoords)
+		{
+			int gx = _previewGridPos.X + offset.X;
+			int gy = _previewGridPos.Y + offset.Y;
 
-	        // Grid sınırları içindeyse ekrana çiz
-	        if (gx >= 0 && gx < 8 && gy >= 0 && gy < 8)
-	        {
-	            float px = GridStartX + (gx * Step) + (gap / 2f);
-	            float py = GridStartY + (gy * Step) + (gap / 2f);
-	            
-	            Rect2 rect = new Rect2(px, py, actualSize, actualSize);
-	            
-	            // Bloğun cam gibi saydam iç dolgusunu çiziyoruz
-	            _highlightOverlay.DrawRect(rect, ghostColor, true);
-	            
-	            // Bloğa şık, ince, parlak bir çerçeve atıyoruz ki 3D oyun alanında belli olsun
-	            _highlightOverlay.DrawRect(rect, new Color(1, 1, 1, 0.3f), false, 2f);
-	        }
-	    }
+			// Grid sınırları içindeyse ekrana çiz
+			if (gx >= 0 && gx < 8 && gy >= 0 && gy < 8)
+			{
+				float px = GridStartX + (gx * Step) + (gap / 2f);
+				float py = GridStartY + (gy * Step) + (gap / 2f);
+				
+				Rect2 rect = new Rect2(px, py, actualSize, actualSize);
+				
+				// Bloğun cam gibi saydam iç dolgusunu çiziyoruz
+				_highlightOverlay.DrawRect(rect, ghostColor, true);
+				
+				// Bloğa şık, ince, parlak bir çerçeve atıyoruz ki 3D oyun alanında belli olsun
+				_highlightOverlay.DrawRect(rect, new Color(1, 1, 1, 0.3f), false, 2f);
+			}
+		}
 
-	    // Eğer geçersiz yere konuyorsa veya patlayacak satır yoksa gökkuşağı çizmeden çık
-	    if (!_isPreviewValid || (_hoverClearRows.Count == 0 && _hoverClearCols.Count == 0)) return;
+		// Eğer geçersiz yere konuyorsa veya patlayacak satır yoksa gökkuşağı çizmeden çık
+		if (!_isPreviewValid || (_hoverClearRows.Count == 0 && _hoverClearCols.Count == 0)) return;
 
-	    // ── 2. PATLAYACAK YERLERİN GÖKKUŞAĞI NEON ÇİZİMİ ──
-	    float time = (float)Time.GetTicksMsec() / 1000f;
-	    Color rainbowColor = Color.FromHsv((time * 2.0f) % 1f, 0.85f, 1f, 0.8f);
-	    float padding = 4f;
+		// ── 2. PATLAYACAK YERLERİN GÖKKUŞAĞI NEON ÇİZİMİ ──
+		float time = (float)Time.GetTicksMsec() / 1000f;
+		Color rainbowColor = Color.FromHsv((time * 2.0f) % 1f, 0.85f, 1f, 0.8f);
+		float padding = 4f;
 
-	    foreach (int y in _hoverClearRows)
-	    {
-	        Rect2 rect = new Rect2(GridStartX - padding, GridStartY + (y * Step) - padding, (8 * Step) + (padding * 2), Step + (padding * 2));
-	        _highlightOverlay.DrawRect(rect, rainbowColor, false, 4f);
-	        _highlightOverlay.DrawRect(rect, new Color(rainbowColor.R, rainbowColor.G, rainbowColor.B, 0.15f), true);
-	    }
+		foreach (int y in _hoverClearRows)
+		{
+			Rect2 rect = new Rect2(GridStartX - padding, GridStartY + (y * Step) - padding, (8 * Step) + (padding * 2), Step + (padding * 2));
+			_highlightOverlay.DrawRect(rect, rainbowColor, false, 4f);
+			_highlightOverlay.DrawRect(rect, new Color(rainbowColor.R, rainbowColor.G, rainbowColor.B, 0.15f), true);
+		}
 
-	    foreach (int x in _hoverClearCols)
-	    {
-	        Rect2 rect = new Rect2(GridStartX + (x * Step) - padding, GridStartY - padding, Step + (padding * 2), (8 * Step) + (padding * 2));
-	        _highlightOverlay.DrawRect(rect, rainbowColor, false, 4f);
-	        _highlightOverlay.DrawRect(rect, new Color(rainbowColor.R, rainbowColor.G, rainbowColor.B, 0.15f), true);
-	    }
+		foreach (int x in _hoverClearCols)
+		{
+			Rect2 rect = new Rect2(GridStartX + (x * Step) - padding, GridStartY - padding, Step + (padding * 2), (8 * Step) + (padding * 2));
+			_highlightOverlay.DrawRect(rect, rainbowColor, false, 4f);
+			_highlightOverlay.DrawRect(rect, new Color(rainbowColor.R, rainbowColor.G, rainbowColor.B, 0.15f), true);
+		}
 	}	
 	
 	
