@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://cgkjcttjqgbm4"]
 
 [ext_resource type="Script" uid="uid://bc4ksbpvjfam" path="res://MainMenu.cs" id="1_06t4h"]
+[ext_resource type="FontFile" uid="uid://b14w3ublxrb2" path="res://Fonts/Honk-Regular.ttf" id="2_7vrkn"]
 
 [node name="MainMenu" type="Control" unique_id=1443399888]
 layout_mode = 3
@@ -10,3 +11,4 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_06t4h")
+HonkFont = ExtResource("2_7vrkn")
