@@ -6,9 +6,21 @@ public partial class MainMenu : Control
 {
     private RandomNumberGenerator _rng = new RandomNumberGenerator();
     private float _spawnTimer = 0f;
+    
+    private readonly List<Vector2I[]> _shapeTemplates = new List<Vector2I[]>
+    {
+        new Vector2I[] { new(0,0), new(1,0), new(0,1), new(1,1) }, // Kare 
+        new Vector2I[] { new(0,0), new(0,1), new(0,2), new(0,3) }, // Dikey Çubuk 
+        new Vector2I[] { new(0,0), new(1,0), new(2,0), new(3,0) }, // Yatay Çubuk 
+        new Vector2I[] { new(0,0), new(0,1), new(0,2), new(1,2) }, // L Şekli (Normal)
+        new Vector2I[] { new(0,0), new(1,0), new(2,0), new(2,1) }, // L Şekli (Yatık)
+        new Vector2I[] { new(0,0), new(1,0), new(1,1), new(2,1) }, // Z Şekli
+        new Vector2I[] { new(0,0), new(1,0), new(2,0), new(0,1), new(1,1), new(2,1) }, // Dikdörtgen (3x2)
+        new Vector2I[] { new(0,0), new(1,0), new(0,1) } // Küçük Köşe (3'lü L)
+    };
 
     // Arka planda süzülecek cam bloklarımızın iskeleti
-    private partial class GlassBlock : Panel
+    private partial class GlassBlock : Control
     {
         public float FallSpeed;
         public float RotationSpeed;
@@ -83,7 +95,7 @@ public partial class MainMenu : Control
         if (_spawnTimer <= 0)
         {
             SpawnGlassBlock();
-            _spawnTimer = _rng.RandfRange(0.2f, 0.7f); // Doğma sıklığı
+            _spawnTimer = _rng.RandfRange(0.4f, 1.2f); // Doğma sıklığı
         }
 
         // Yaşayan tüm blokları aşağıya doğru süzülerek düşür
@@ -95,7 +107,7 @@ public partial class MainMenu : Control
             b.Rotation += b.RotationSpeed * d;
 
             // Ekrandan tamamen çıkan blokları hafızadan (RAM) silme islemi
-            if (b.Position.Y > screenSize.Y + 200)
+            if (b.Position.Y > screenSize.Y + 300)
             {
                 b.QueueFree();
                 _blocks.RemoveAt(i);
@@ -106,35 +118,51 @@ public partial class MainMenu : Control
     private void SpawnGlassBlock()
     {
         GlassBlock block = new GlassBlock();
+        block.ZIndex = -1; 
         
-        float size = _rng.RandfRange(40f, 120f);
-        block.Size = new Vector2(size, size);
+        // RASTGELE BİR ŞEKİL VE HÜCRE BOYUTU 
+        Vector2I[] shape = _shapeTemplates[_rng.RandiRange(0, _shapeTemplates.Count - 1)];
+        float cellSize = _rng.RandfRange(25f, 45f); 
+
+        // ŞEKLİN GENİŞLİĞİ
+        int maxX = 0, maxY = 0;
+        foreach (Vector2I pos in shape)
+        {
+            if (pos.X > maxX) maxX = pos.X;
+            if (pos.Y > maxY) maxY = pos.Y;
+        }
         
-        // BUZLU CAM EFEKTİ 
+        block.Size = new Vector2((maxX + 1) * cellSize, (maxY + 1) * cellSize);
+        block.PivotOffset = block.Size / 2f; 
+        
         StyleBoxFlat style = new StyleBoxFlat();
-        style.BgColor = new Color(1, 1, 1, _rng.RandfRange(0.02f, 0.08f)); 
+        style.BgColor = new Color(1, 1, 1, _rng.RandfRange(0.02f, 0.08f));
         style.BorderWidthTop = 1;
         style.BorderWidthLeft = 1;
         style.BorderWidthBottom = 1;
         style.BorderWidthRight = 1;
-        style.BorderColor = new Color(1, 1, 1, 0.15f); 
-        style.CornerRadiusTopLeft = 8;
-        style.CornerRadiusTopRight = 8;
-        style.CornerRadiusBottomLeft = 8;
-        style.CornerRadiusBottomRight = 8;
+        style.BorderColor = new Color(1, 1, 1, 0.15f);
         
-        block.AddThemeStyleboxOverride("panel", style);
+        style.CornerRadiusTopLeft = 4;
+        style.CornerRadiusTopRight = 4;
+        style.CornerRadiusBottomLeft = 4;
+        style.CornerRadiusBottomRight = 4;
+        
+        foreach (Vector2I pos in shape)
+        {
+            Panel cell = new Panel();
+            cell.Size = new Vector2(cellSize, cellSize);
+            cell.Position = new Vector2(pos.X * cellSize, pos.Y * cellSize);
+            cell.AddThemeStyleboxOverride("panel", style);
+            block.AddChild(cell);
+        }
         
         Vector2 screenSize = GetViewportRect().Size;
-        block.Position = new Vector2(_rng.RandfRange(-50, screenSize.X), -150);
+        block.Position = new Vector2(_rng.RandfRange(-100, screenSize.X + 50), -300);
         
-        block.PivotOffset = new Vector2(size / 2, size / 2);
-        
-        block.FallSpeed = _rng.RandfRange(30f, 150f);
+        block.FallSpeed = _rng.RandfRange(40f, 130f);
         block.RotationSpeed = _rng.RandfRange(-1.5f, 1.5f);
-        
-         block.ZIndex = -1;
-        
+
         _blocks.Add(block);
         AddChild(block);
     }
