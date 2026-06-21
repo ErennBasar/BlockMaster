@@ -35,6 +35,7 @@ public partial class BlockMaster : Node2D
 	private int _score = 0;
 	private int _comboStreak = 0;
 	private int _comboCount = 0;
+	private int _comboSafeZone = 5; 
 	private Label _scoreLabel;
 	private int _highScore = 0;
 	private Label _highScoreLabel;
@@ -300,9 +301,13 @@ public partial class BlockMaster : Node2D
 			// int comboMultiplier = linesCleared + (_comboStreak - 1);
 			// int clearScore = (linesCleared * baseScorePerLine) * comboMultiplier;
 			
+			if (linesCleared >= 3)
+			{
+				_comboSafeZone += 2;
+				GD.Print($"🌟 İNANILMAZ HAMLE! Kombo Güvenli Barajı {_comboSafeZone} seviyesine yükseldi!");
+			}
+			
 			int baseScore = (linesCleared * linesCleared) * 100; 
-       
-			// Çarpanı kombo serisiyle katlıyoruz!
 			int clearScore = baseScore * _comboStreak;
 			
 			Vector2 boardCenter = new Vector2(GridStartX + (4 * Step), GridStartY + (4 * Step));
@@ -332,11 +337,14 @@ public partial class BlockMaster : Node2D
 				
 				// PERFECT YAZISI (Fosforlu Yeşil ve 2x devasa boyutta biraz daha yukarıdan)
 				ShowFloatingText(boardCenter + new Vector2(0, -60), "PERFECT CLEAR!\n+4000", new Color(0.2f, 1f, 0.2f), 2.0f);
+				
+				_comboSafeZone += 5;
+				GD.Print($"🔥 MÜKEMMEL TEMİZLİK! Kombo Güvenli Barajı {_comboSafeZone} seviyesine fırladı!");
 			}
 		}
 		else
 		{
-			if (_comboStreak > 7)
+			if (_comboStreak > _comboSafeZone)
 			{
 				_comboStreak--;
 			}
