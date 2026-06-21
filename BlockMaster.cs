@@ -24,7 +24,7 @@ public partial class BlockMaster : Node2D
 	private const int Step = CellSize + CellPadding;
 
 	private const float GridStartX = 60f;
-	private const float GridStartY = 250f;
+	private const float GridStartY = 350f;
 
 	private readonly float[] _slotXPositions = { 200f, 580f, 960f };
 	private const float SlotYPosition = 1800f;
@@ -34,6 +34,7 @@ public partial class BlockMaster : Node2D
 
 	private int _score = 0;
 	private int _comboStreak = 0;
+	private int _comboCount = 0;
 	private Label _scoreLabel;
 	private int _highScore = 0;
 	private Label _highScoreLabel;
@@ -282,48 +283,6 @@ public partial class BlockMaster : Node2D
 			}
 		}
 		
-		//3x3 bolge kontrolu
-		// for (int regionX = 0; regionX < 3; regionX++)
-		// {
-		// 	for (int regionY = 0; regionY < 3; regionY++)
-		// 	{
-		// 		bool isRegionFull = true;
-		// 		
-		// 		// O andaki 3x3'luk alanin icindeki 9 kucuk hucreyi tarama
-		// 		for (int i = 0; i < 3; i++)
-		// 		{
-		// 			for (int j = 0; j < 3; j++)
-		// 			{
-		// 				int gridX = (regionX * 3) + i;
-		// 				int gridY = (regionY * 3) + j;
-		//
-		// 				if (_grid[gridX,gridY] == 0)
-		// 				{
-		// 					isRegionFull = false;
-		// 					break;
-		// 				}
-		// 			}
-		//
-		// 			if (!isRegionFull)
-		// 			{
-		// 				break;
-		// 			}
-		// 		}
-		//
-		// 		if (isRegionFull)
-		// 		{
-		// 			linesCleared++;
-		// 			for (int i = 0; i < 3; i++)
-		// 			{
-		// 				for (int j = 0; j < 3; j++)
-		// 				{
-		// 					cellsToClear.Add(new Vector2I((regionX * 3) + i, (regionY * 3) + j));
-		// 				}
-		// 			}
-		// 		}
-		// 	}
-		// }
-		
 		//Temizleme ve kombo erkani
 		if (cellsToClear.Count > 0)
 		{
@@ -337,17 +296,22 @@ public partial class BlockMaster : Node2D
 			
 			GD.Print($"BOOM! {linesCleared} adet çizgi/bölge patlatıldı! Toplam silinen hücre: {cellsToClear.Count}");
 
-			int baseScorePerLine = 100;
-			int comboMultiplier = linesCleared + (_comboStreak - 1);
-			int clearScore = (linesCleared * baseScorePerLine) * comboMultiplier;
+			// int baseScorePerLine = 100;
+			// int comboMultiplier = linesCleared + (_comboStreak - 1);
+			// int clearScore = (linesCleared * baseScorePerLine) * comboMultiplier;
+			
+			int baseScore = (linesCleared * linesCleared) * 100; 
+       
+			// Çarpanı kombo serisiyle katlıyoruz!
+			int clearScore = baseScore * _comboStreak;
 			
 			Vector2 boardCenter = new Vector2(GridStartX + (4 * Step), GridStartY + (4 * Step));
 			
 			// Eger birden fazla bolge ayni anda patlatildiysa
 			if (linesCleared > 1 || _comboStreak > 1)
 			{
-				GD.Print($"BOOM! {linesCleared} ÇİZGİ PATLADI! | SERİ: x{_comboStreak} | ÇARPAN: X{comboMultiplier}");
-				AddScore(clearScore, $"X{comboMultiplier} KOMBO PATLATMASI");
+				GD.Print($"BOOM! {linesCleared} ÇİZGİ PATLADI! | SERİ: x{_comboStreak} | ÇARPAN: X{_comboStreak}");
+				AddScore(clearScore, $"X{_comboStreak} KOMBO PATLATMASI");
 				
 				// KOMBO YAZISINI FIRLAT (Altın sarısı ve 1.5x devasa boyutta)
 				ShowFloatingText(boardCenter, $"{linesCleared} LINE COMBO!\n+{clearScore}", new Color(1f, 0.84f, 0f), 1.5f);
@@ -367,12 +331,15 @@ public partial class BlockMaster : Node2D
 				AddScore(4000,"PERFECT CLEAR!");
 				
 				// PERFECT YAZISI (Fosforlu Yeşil ve 2x devasa boyutta biraz daha yukarıdan)
-				ShowFloatingText(boardCenter + new Vector2(0, -60), "PERFECT CLEAR!\n+1000", new Color(0.2f, 1f, 0.2f), 2.0f);
+				ShowFloatingText(boardCenter + new Vector2(0, -60), "PERFECT CLEAR!\n+4000", new Color(0.2f, 1f, 0.2f), 2.0f);
 			}
 		}
 		else
 		{
-			_comboStreak = 0;
+			if (_comboStreak > 7)
+			{
+				_comboStreak--;
+			}
 		}
 		
 		SyncVisuals();
@@ -711,7 +678,7 @@ public partial class BlockMaster : Node2D
 			_highScore = _score;
 			if (_highScoreLabel != null)
 			{
-				_highScoreLabel.Text = $"REKOR: {_highScore}";
+				_highScoreLabel.Text = $"🏆 {_highScore}";
 			}
 			SaveHighScore();
 		}
@@ -722,7 +689,7 @@ public partial class BlockMaster : Node2D
 	// ── 1. EKRANIN SOL ÜST KÖŞESİ (REKOR VE SEMBOL) ──
 	_highScoreLabel = new Label();
 	// Ekrana tam yapışmasın, sol üstten 30 piksel boşluk bıraksın
-	_highScoreLabel.Position = new Vector2(30, 30);
+	_highScoreLabel.Position = new Vector2(80, 120);
 	
 	// Başına kral tacı veya kupa emojisi ekliyoruz. (Godot'un varsayılan fontu emojileri okur)
 	_highScoreLabel.Text = $"🏆{_highScore}";
